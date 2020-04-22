@@ -16,9 +16,15 @@ namespace UCL.BuildLib {
         [UCL.Core.PA.UCL_ButtonProperty("ApplySetting")] public bool m_ApplySetting;
 
         /// <summary>
+        /// Create a Button invoke LoadCurrentSetting()
+        /// </summary>
+        [UCL.Core.PA.UCL_ButtonProperty("LoadCurrentSetting")] public bool m_LoadCurrentSetting;
+        /// <summary>
         /// Create a Button invoke Build()
         /// </summary>
         [UCL.Core.PA.UCL_ButtonProperty("Build")] public bool m_Build;
+
+        //[UCL.Core.PA.UCL_ReadOnlyProperty] public string m_Test = "QwQ";
         #endregion
 
         /// <summary>
@@ -28,7 +34,8 @@ namespace UCL.BuildLib {
 
         public BuildTargetGroup m_BuildTargetGroup = BuildTargetGroup.Standalone;
         public BuildTarget m_BuildTarget = BuildTarget.StandaloneWindows64;
-        public BuildOptions m_BuildOption = BuildOptions.None;
+        [UCL.Core.PA.UCL_EnumMaskProperty] public BuildOptions m_BuildOption = BuildOptions.None;
+        public Texture2D[] m_Icons;
         public bool m_BuildAppBundle = false;
         public string m_OutputPath = "";
         #region KeyStore
@@ -44,17 +51,23 @@ namespace UCL.BuildLib {
 
         public static UCL_BuildSetting GetSetting(string path) {
             return Resources.Load<UCL_BuildSetting>(path);
+            //AssetDatabase.LoadMainAssetAtPath
+        }
+        public static UCL_BuildSetting GetSettingByPath(string path) {
+            return AssetDatabase.LoadMainAssetAtPath(path) as UCL_BuildSetting;
         }
         public static UCL_BuildSetting GetDefaultSetting() {
             return GetSetting("DefaultBuildSetting");
         }
-        public static string GetCurrentSettingName() {
+        public static string GetCurrentSettingPath() {
             string str = PlayerPrefs.GetString("Current_UCL_BuildSetting");
             Debug.LogWarning("GetCurrentSettingName:" + str);
             return str;
         }
-        protected static void SetCurrentSettingName(string name) {
+        protected static void SetCurrentSettingPath(string name) {
             PlayerPrefs.SetString("Current_UCL_BuildSetting", name);
+            PlayerPrefs.Save();
+            Debug.LogWarning("SetCurrentSettingName:" + name);
         }
         [UnityEditor.MenuItem("UCL/BuildLib/DefaultBuildSetting")]
         public static void SelectDefaultSetting() {
@@ -76,7 +89,7 @@ namespace UCL.BuildLib {
         /// </summary>
         public static void BuildBySetting() {
             try {
-                string prev_setting = GetCurrentSettingName();
+                string prev_setting = GetCurrentSettingPath();
                 UCL_BuildSetting setting = null;
                 const string BuildSettingKey = "-buildsetting";
                 string setting_name = GetArg(BuildSettingKey);
@@ -95,7 +108,7 @@ namespace UCL.BuildLib {
                 setting.Build();
 
                 if(!string.IsNullOrEmpty(prev_setting)) {//reset to prev setting
-                    GetSetting(prev_setting)?.ApplySetting();
+                    GetSettingByPath(prev_setting)?.ApplySetting();
                 }
             }catch(Exception e) {
                 Debug.LogError("BuildBySetting() Exception:" + e);
@@ -128,8 +141,54 @@ namespace UCL.BuildLib {
             }
             */
         }
+        protected void SetIcons(Texture2D[] icons) {
+            if(icons == null || icons.Length == 0) return;
+            int[] iconSizes = PlayerSettings.GetIconSizesForTargetGroup(m_BuildTargetGroup);
+            Texture2D[] tmp_icon = new Texture2D[iconSizes.Length];
+            for(int i = 0; i < tmp_icon.Length; i++) {
+                if(i < icons.Length) {
+                    tmp_icon[i] = icons[i];
+                } else {
+                    tmp_icon[i] = icons[icons.Length - 1];
+                }
+            }
+            PlayerSettings.SetIconsForTargetGroup(m_BuildTargetGroup, tmp_icon);
+            //PlayerSettings.SetPlatformIcons(m_BuildTargetGroup, m_Icons);
+        }
+        public void LoadCurrentSetting() {
+            m_BuildTarget = EditorUserBuildSettings.activeBuildTarget;
+            m_BuildTargetGroup = BuildPipeline.GetBuildTargetGroup(m_BuildTarget);
+
+            m_ProductName = PlayerSettings.productName;
+
+            m_KeystoreName = PlayerSettings.Android.keystoreName;
+            m_KeystorePass = PlayerSettings.keystorePass;
+            m_KeyaliasName = PlayerSettings.Android.keyaliasName;
+            m_KeyaliasPass = PlayerSettings.keyaliasPass;
+
+            m_BuildAppBundle = EditorUserBuildSettings.buildAppBundle;
+            
+            m_ScriptingDefineSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(m_BuildTargetGroup);
+
+            m_BuildOption = 0;
+            if(EditorUserBuildSettings.development) {
+                m_BuildOption |= BuildOptions.Development;
+            }
+            if(EditorUserBuildSettings.waitForPlayerConnection) {
+                m_BuildOption |= BuildOptions.WaitForPlayerConnection;
+            }
+            if(EditorUserBuildSettings.allowDebugging) {
+                m_BuildOption |= BuildOptions.AllowDebugging;
+            }
+            if(EditorUserBuildSettings.buildScriptsOnly) {
+                m_BuildOption |= BuildOptions.BuildScriptsOnly;
+            }
+
+            m_Icons = PlayerSettings.GetIconsForTargetGroup(m_BuildTargetGroup);
+        }
         public void ApplySetting() {
-            Debug.Log("SetBuildSetting:" + name);
+            Debug.Log("SetBuildSetting:" + name +",Prev:"+ GetCurrentSettingPath());
+
             var default_setting = GetDefaultSetting();
             
             if(default_setting != this) {//Load default setting first!!
@@ -138,9 +197,8 @@ namespace UCL.BuildLib {
                 //PlayerSettings.productName = m_ProductName;
                 //return;
             }
-            SetCurrentSettingName(name);
             EditorUserBuildSettings.SwitchActiveBuildTarget(m_BuildTargetGroup, m_BuildTarget);
-
+            
             if(!string.IsNullOrEmpty(m_ProductName)) {
                 PlayerSettings.productName = m_ProductName;
             }
@@ -157,14 +215,21 @@ namespace UCL.BuildLib {
                 PlayerSettings.keyaliasPass = m_KeyaliasPass;
             }
 
+            if(m_Icons != null && m_Icons.Length > 0) {
+                SetIcons(m_Icons);
+            } else if(default_setting != null) {
+                SetIcons(default_setting.m_Icons);
+            }
+
             if(PlayerSettings.GetScriptingDefineSymbolsForGroup(m_BuildTargetGroup) != m_ScriptingDefineSymbols) {
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(m_BuildTargetGroup, m_ScriptingDefineSymbols);
             }
 
             EditorUserBuildSettings.buildAppBundle = m_BuildAppBundle;
 
-
+            SetCurrentSettingPath(AssetDatabase.GetAssetPath(this));
             AssetDatabase.SaveAssets();
+            
         }
 #endif
     }
