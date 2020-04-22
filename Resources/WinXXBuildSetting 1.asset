@@ -15,10 +15,11 @@ MonoBehaviour:
   m_ApplySetting: 0
   m_LoadCurrentSetting: 0
   m_Build: 0
+  m_Test: 0
   m_ProductName: UCLibWinXX
   m_BuildTargetGroup: 1
   m_BuildTarget: 19
-  m_BuildOption: 0
+  m_BuildOption: 176
   m_Icons:
   - {fileID: 2800000, guid: 6f410c15ce9be2741bae77a30a336748, type: 3}
   - {fileID: 2800000, guid: 8b6b4ff52c49a2a43a602895465e107c, type: 3}

@@ -27,6 +27,18 @@ namespace UCL.BuildLib {
         //[UCL.Core.PA.UCL_ReadOnlyProperty] public string m_Test = "QwQ";
         #endregion
 
+
+
+        //[Flags]
+        public enum MyEnum {
+            Foo = 1<<1,
+            Bar = 1<<2,
+
+            Baz = 1<<4, // <-- skips 0x4
+            QAQ = 1<<7
+        }
+
+        [UCL.Core.PA.UCL_EnumMaskProperty] public MyEnum m_Test;
         /// <summary>
         /// if(m_ProductName == "") PlayerSettings.productName will use setting in DefaultBuildSetting
         /// </summary>
