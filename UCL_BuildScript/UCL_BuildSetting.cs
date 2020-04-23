@@ -28,7 +28,6 @@ namespace UCL.BuildLib {
         [Header("Apply BuildSetting to EditorBuildSetting and Build")]
         [UCL.Core.PA.UCL_ButtonProperty("Build")] public bool m_Build;
         [Space(20)]
-        //[UCL.Core.PA.UCL_ReadOnlyProperty] public string m_Test = "QwQ";
         #endregion
 
         /*
@@ -43,10 +42,19 @@ namespace UCL.BuildLib {
 
         [UCL.Core.PA.UCL_EnumMaskProperty] public MyEnum m_Test;
         */
+
+        /// <summary>
+        /// DefaultSettingg this BuildSetting Base On
+        /// Most of the unset setting will use setting in DefaultSetting
+        /// </summary>
+        [Header("DefaultSetting this BuildSetting Base On")]
+        public UCL_BuildSetting m_DefaultSetting;
+
         /// <summary>
         /// if(m_ProductName == "") PlayerSettings.productName will use setting in DefaultBuildSetting
         /// </summary>
         public string m_ProductName = "";
+
 
         public BuildTargetGroup m_BuildTargetGroup = BuildTargetGroup.Standalone;
         public BuildTarget m_BuildTarget = BuildTarget.StandaloneWindows64;
@@ -229,14 +237,12 @@ namespace UCL.BuildLib {
         }
         public void ApplySetting() {
             Debug.Log("SetBuildSetting:" + name +",Prev:"+ GetCurrentSettingPath());
-
-            var default_setting = GetDefaultSetting();
-            
-            if(default_setting != this) {//Load default setting first!!
+            UCL_BuildSetting default_setting = m_DefaultSetting;
+            if(default_setting == null) {
+                default_setting = GetDefaultSetting();
+            }
+            if(default_setting!=null && default_setting != this) {//Load default setting first!!
                 default_setting.ApplyDefaultSetting();
-            } else {//this is default setting!! Init build setting!!
-                //PlayerSettings.productName = m_ProductName;
-                //return;
             }
             EditorUserBuildSettings.SwitchActiveBuildTarget(m_BuildTargetGroup, m_BuildTarget);
             
