@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Reflection;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -13,32 +14,35 @@ namespace UCL.BuildLib {
         /// <summary>
         /// Create a Button invoke SetSetting()
         /// </summary>
+        [Header("Apply BuildSetting to EditorBuildSetting")]
         [UCL.Core.PA.UCL_ButtonProperty("ApplySetting")] public bool m_ApplySetting;
 
         /// <summary>
         /// Create a Button invoke LoadCurrentSetting()
         /// </summary>
+        [Header("Load current EditorBuildSetting into BuildSetting")]
         [UCL.Core.PA.UCL_ButtonProperty("LoadCurrentSetting")] public bool m_LoadCurrentSetting;
         /// <summary>
         /// Create a Button invoke Build()
         /// </summary>
+        [Header("Apply BuildSetting to EditorBuildSetting and Build")]
         [UCL.Core.PA.UCL_ButtonProperty("Build")] public bool m_Build;
-
+        [Space(20)]
         //[UCL.Core.PA.UCL_ReadOnlyProperty] public string m_Test = "QwQ";
         #endregion
 
-
-
+        /*
         //[Flags]
         public enum MyEnum {
             Foo = 1<<1,
             Bar = 1<<2,
 
-            Baz = 1<<4, // <-- skips 0x4
+            Baz = 1<<4,
             QAQ = 1<<7
         }
 
         [UCL.Core.PA.UCL_EnumMaskProperty] public MyEnum m_Test;
+        */
         /// <summary>
         /// if(m_ProductName == "") PlayerSettings.productName will use setting in DefaultBuildSetting
         /// </summary>
@@ -182,21 +186,46 @@ namespace UCL.BuildLib {
             
             m_ScriptingDefineSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(m_BuildTargetGroup);
 
-            m_BuildOption = 0;
-            if(EditorUserBuildSettings.development) {
-                m_BuildOption |= BuildOptions.Development;
-            }
-            if(EditorUserBuildSettings.waitForPlayerConnection) {
-                m_BuildOption |= BuildOptions.WaitForPlayerConnection;
-            }
-            if(EditorUserBuildSettings.allowDebugging) {
-                m_BuildOption |= BuildOptions.AllowDebugging;
-            }
-            if(EditorUserBuildSettings.buildScriptsOnly) {
-                m_BuildOption |= BuildOptions.BuildScriptsOnly;
-            }
+            
+            /*
+                        m_BuildOption = 0;
+            if(EditorUserBuildSettings.allowDebugging) m_BuildOption |= BuildOptions.AllowDebugging;
 
+            if(EditorUserBuildSettings.development) m_BuildOption |= BuildOptions.Development;
+            if(EditorUserBuildSettings.waitForPlayerConnection) m_BuildOption |= BuildOptions.WaitForPlayerConnection;
+            if(EditorUserBuildSettings.buildScriptsOnly) m_BuildOption |= BuildOptions.BuildScriptsOnly;
+            */
+            var player_options = GetBuildPlayerOptions();
+            //m_BuildTarget = player_options.target;
+
+            try {
+                string path = Application.dataPath.Replace("Assets", "");
+                Debug.LogWarning("Application.dataPath:" + path);
+                m_OutputPath = player_options.locationPathName.Replace(path, "");
+            } catch(Exception e) {
+                Debug.LogError("LoadCurrentSetting() Exception:" + e);
+            }
+            
+            m_BuildOption = player_options.options;
+            //m_BuildOption = BuildPlayerWindow.DefaultBuildMethods.GetBuildPlayerOptions(defaultOptions).options;
             m_Icons = PlayerSettings.GetIconsForTargetGroup(m_BuildTargetGroup);
+        }
+        static public BuildPlayerOptions GetBuildPlayerOptions() {
+            try {
+                MethodInfo method = typeof(BuildPlayerWindow.DefaultBuildMethods).GetMethod("GetBuildPlayerOptionsInternal",
+                    BindingFlags.NonPublic | BindingFlags.Static);
+                if(method != null) {
+                    BuildPlayerOptions defaultOptions = new BuildPlayerOptions();
+                    bool askForLocation = false;
+                    var option = (BuildPlayerOptions)(method.Invoke(null, new object[] { askForLocation, defaultOptions }));
+                    return option;
+                } else {
+                    Debug.LogError("UCL_BuildSetting method GetBuildPlayerOptionsInternal not Exist!!");
+                }
+            } catch(Exception e) {
+                Debug.LogError("UCL_BuildSetting GetBuildPlayerOptions() Exception:" + e);
+            }
+            return default;
         }
         public void ApplySetting() {
             Debug.Log("SetBuildSetting:" + name +",Prev:"+ GetCurrentSettingPath());
