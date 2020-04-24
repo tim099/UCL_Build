@@ -27,7 +27,8 @@ namespace UCL.BuildLib {
         /// </summary>
         [Header("Apply BuildSetting to EditorBuildSetting and Build")]
         [UCL.Core.PA.UCL_ButtonProperty("Build")] public bool m_Build;
-        [Space(20)]
+
+        [Space(10)]
         #endregion
 
         /*
@@ -62,6 +63,10 @@ namespace UCL.BuildLib {
         public Texture2D[] m_Icons;
         public bool m_BuildAppBundle = false;
         public string m_OutputPath = "";
+
+        [Header("Use Editor Setting if m_ScenesInBuild is Empty.")]
+        public UnityEngine.Object[] m_ScenesInBuild;
+
         #region KeyStore
         [Header("Key Store")]
         public string m_KeystoreName = "";
@@ -71,7 +76,6 @@ namespace UCL.BuildLib {
         #endregion
         [Header("Define Symbols not apply DefaultBuildSetting")]
         public string m_ScriptingDefineSymbols = "";
-        //public string m_CurrentSetting = "";
 
         public static UCL_BuildSetting GetSetting(string path) {
             return Resources.Load<UCL_BuildSetting>(path);
@@ -145,7 +149,27 @@ namespace UCL.BuildLib {
             Debug.LogWarning("PerformBuild path:" + path);
             Debug.LogWarning("PerformBuild target:" + m_BuildTarget.ToString());
 
-            var res = BuildPipeline.BuildPlayer(UCL.SceneLib.Lib.GetAcitveScenesPath(), Application.dataPath.Replace("Assets", path), m_BuildTarget , m_BuildOption);
+            var res = BuildPipeline.BuildPlayer(GetScenesPath(), Application.dataPath.Replace("Assets", path), m_BuildTarget , m_BuildOption);
+        }
+        public string[] GetScenesPath() {
+            string[] ScenesPath = null;
+            UnityEngine.Object[] ScenesInBuild = m_ScenesInBuild;
+            if((ScenesInBuild == null ||ScenesInBuild.Length == 0) && m_DefaultSetting != null) ScenesInBuild = m_DefaultSetting.m_ScenesInBuild;
+            if(ScenesInBuild != null && ScenesInBuild.Length > 0) {
+                List<string> ScenesPathList = new List<string>();
+                for(int i = 0; i < ScenesInBuild.Length; i++) {
+                    var scene = ScenesInBuild[i];
+                    ScenesPathList.Add(AssetDatabase.GetAssetPath(scene.GetInstanceID()));
+                }
+                ScenesPath = ScenesPathList.ToArray();
+            }else {
+                ScenesPath = UCL.SceneLib.Lib.GetAcitveScenesPath();
+            }
+            for(int i = 0; i < ScenesPath.Length; i++) {
+                var scene = ScenesPath[i];
+                //Debug.LogWarning("Path:" + scene);
+            }
+            return ScenesPath;
         }
         public void Build() {
             ApplySetting();
