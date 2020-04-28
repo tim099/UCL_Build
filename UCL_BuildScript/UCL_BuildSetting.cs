@@ -55,7 +55,7 @@ namespace UCL.BuildLib {
         /// if(m_ProductName == "") PlayerSettings.productName will use setting in DefaultBuildSetting
         /// </summary>
         public string m_ProductName = "";
-
+        public string m_ApplicationIdentifier="";
 
         public BuildTargetGroup m_BuildTargetGroup = BuildTargetGroup.Standalone;
         public BuildTarget m_BuildTarget = BuildTarget.StandaloneWindows64;
@@ -183,6 +183,10 @@ namespace UCL.BuildLib {
             PlayerSettings.Android.keyaliasName = m_KeyaliasName;
             PlayerSettings.keyaliasPass = m_KeyaliasPass;
             EditorUserBuildSettings.buildAppBundle = m_BuildAppBundle;
+
+            if(!string.IsNullOrEmpty(m_ApplicationIdentifier)) {
+                PlayerSettings.applicationIdentifier = m_ApplicationIdentifier;
+            }
             /*
             if(PlayerSettings.GetScriptingDefineSymbolsForGroup(m_BuildTargetGroup) != m_ScriptingDefineSymbols) {
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(m_BuildTargetGroup, m_ScriptingDefineSymbols);
@@ -217,8 +221,8 @@ namespace UCL.BuildLib {
             m_BuildAppBundle = EditorUserBuildSettings.buildAppBundle;
             
             m_ScriptingDefineSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(m_BuildTargetGroup);
+            m_ApplicationIdentifier = PlayerSettings.applicationIdentifier;
 
-            
             /*
                         m_BuildOption = 0;
             if(EditorUserBuildSettings.allowDebugging) m_BuildOption |= BuildOptions.AllowDebugging;
@@ -269,6 +273,9 @@ namespace UCL.BuildLib {
                 default_setting.ApplyDefaultSetting();
             }
             EditorUserBuildSettings.SwitchActiveBuildTarget(m_BuildTargetGroup, m_BuildTarget);
+            if(!string.IsNullOrEmpty(m_ApplicationIdentifier)) {
+                PlayerSettings.applicationIdentifier = m_ApplicationIdentifier;
+            }
             
             if(!string.IsNullOrEmpty(m_ProductName)) {
                 PlayerSettings.productName = m_ProductName;

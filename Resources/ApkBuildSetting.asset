@@ -12,14 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b8426d920d4e6d4ab622ad70ba5f108, type: 3}
   m_Name: ApkBuildSetting
   m_EditorClassIdentifier: 
-  m_SetSetting: 0
+  m_ApplySetting: 0
+  m_LoadCurrentSetting: 0
   m_Build: 0
+  m_DefaultSetting: {fileID: 0}
   m_ProductName: UCLibApk
+  m_ApplicationIdentifier: com.TimUCL.UCLibApk
   m_BuildTargetGroup: 7
   m_BuildTarget: 13
   m_BuildOption: 0
+  m_Icons: []
   m_BuildAppBundle: 0
   m_OutputPath: Build/Apk/UCL.apk
+  m_ScenesInBuild: []
   m_KeystoreName: 
   m_KeystorePass: 
   m_KeyaliasName: 
