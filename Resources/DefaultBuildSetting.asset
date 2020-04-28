@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: DefaultBuildSetting
   m_EditorClassIdentifier: 
   m_ApplySetting: 0
+  m_LoadCurrentSetting: 0
   m_Build: 0
+  m_DefaultSetting: {fileID: 0}
   m_ProductName: UCLib
+  m_ApplicationIdentifier: com.TimUCL.UCLib
   m_BuildTargetGroup: 1
   m_BuildTarget: 19
   m_BuildOption: 0
@@ -22,6 +25,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: ab664528da6f4b845907aa2fa4941609, type: 3}
   m_BuildAppBundle: 0
   m_OutputPath: 
+  m_ScenesInBuild: []
   m_KeystoreName: Build/UCL.keystore
   m_KeystorePass: uclkey
   m_KeyaliasName: uclibalias
