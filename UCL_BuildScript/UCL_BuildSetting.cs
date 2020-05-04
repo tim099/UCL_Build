@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Reflection;
@@ -150,12 +149,19 @@ namespace UCL.BuildLib {
             Debug.LogWarning("PerformBuild target:" + m_BuildTarget.ToString());
             string build_path = Application.dataPath.Replace("Assets", path);
             if(UnityEditorInternal.InternalEditorUtility.inBatchMode) {
+                Debug.LogWarning("UnityEditorInternal.InternalEditorUtility.inBatchMode == true");
                 string str = GetArg("-output");
+                Debug.LogWarning("-output:"+ str);
                 if(!string.IsNullOrEmpty(str)) {
-                    build_path = path;
+                    build_path = str;
+                    Debug.LogWarning("Set build_path:"+ str);
+                } else {
+                    Debug.LogWarning("-output string.IsNullOrEmpty!!");
                 }
             }
-            var res = BuildPipeline.BuildPlayer(GetScenesPath(), build_path + m_OutputName, m_BuildTarget , m_BuildOption);
+            string output_path = build_path + m_OutputName;
+            Debug.LogWarning("PerformBuild output_path:" + output_path);
+            var res = BuildPipeline.BuildPlayer(GetScenesPath(), output_path, m_BuildTarget , m_BuildOption);
         }
         public string[] GetScenesPath() {
             string[] ScenesPath = null;
