@@ -63,7 +63,7 @@ namespace UCL.BuildLib {
         public Texture2D[] m_Icons;
         public bool m_BuildAppBundle = false;
         public string m_OutputPath = "";
-
+        public string m_OutputName = "";
         [Header("Use Editor Setting if m_ScenesInBuild is Empty.")]
         public UnityEngine.Object[] m_ScenesInBuild;
 
@@ -148,8 +148,14 @@ namespace UCL.BuildLib {
         void PerformBuild(string path) {
             Debug.LogWarning("PerformBuild path:" + path);
             Debug.LogWarning("PerformBuild target:" + m_BuildTarget.ToString());
-
-            var res = BuildPipeline.BuildPlayer(GetScenesPath(), Application.dataPath.Replace("Assets", path), m_BuildTarget , m_BuildOption);
+            string build_path = Application.dataPath.Replace("Assets", path);
+            if(UnityEditorInternal.InternalEditorUtility.inBatchMode) {
+                string str = GetArg("-output");
+                if(!string.IsNullOrEmpty(str)) {
+                    build_path = path;
+                }
+            }
+            var res = BuildPipeline.BuildPlayer(GetScenesPath(), build_path + m_OutputName, m_BuildTarget , m_BuildOption);
         }
         public string[] GetScenesPath() {
             string[] ScenesPath = null;

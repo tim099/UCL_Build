@@ -13,13 +13,19 @@ MonoBehaviour:
   m_Name: Win32BuildSetting
   m_EditorClassIdentifier: 
   m_ApplySetting: 0
+  m_LoadCurrentSetting: 0
   m_Build: 0
+  m_DefaultSetting: {fileID: 0}
   m_ProductName: UCLibWin32
+  m_ApplicationIdentifier: 
   m_BuildTargetGroup: 1
   m_BuildTarget: 5
   m_BuildOption: 0
+  m_Icons: []
   m_BuildAppBundle: 0
-  m_OutputPath: Build/PC/UCLWin32.exe
+  m_OutputPath: Build/PC/
+  m_OutputName: UCLWin32.exe
+  m_ScenesInBuild: []
   m_KeystoreName: Build/UCLTest.keystore
   m_KeystorePass: 
   m_KeyaliasName: 

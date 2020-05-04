@@ -15,13 +15,17 @@ MonoBehaviour:
   m_ApplySetting: 0
   m_LoadCurrentSetting: 0
   m_Build: 0
+  m_DefaultSetting: {fileID: 0}
   m_ProductName: UCLibApk
+  m_ApplicationIdentifier: 
   m_BuildTargetGroup: 7
   m_BuildTarget: 13
   m_BuildOption: 0
   m_Icons: []
   m_BuildAppBundle: 1
-  m_OutputPath: Build/Apk/UCL.apk
+  m_OutputPath: Build/Apk/
+  m_OutputName: UCL.apk
+  m_ScenesInBuild: []
   m_KeystoreName: 
   m_KeystorePass: 
   m_KeyaliasName: 

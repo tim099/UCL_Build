@@ -23,7 +23,8 @@ MonoBehaviour:
   m_BuildOption: 0
   m_Icons: []
   m_BuildAppBundle: 0
-  m_OutputPath: Build/Apk/UCL.apk
+  m_OutputPath: Build/Apk/
+  m_OutputName: UCL.apk
   m_ScenesInBuild: []
   m_KeystoreName: 
   m_KeystorePass: 
