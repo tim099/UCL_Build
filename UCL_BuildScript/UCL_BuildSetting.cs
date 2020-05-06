@@ -14,18 +14,18 @@ namespace UCL.BuildLib {
         /// Create a Button invoke SetSetting()
         /// </summary>
         [Header("Apply BuildSetting to EditorBuildSetting")]
-        [UCL.Core.PA.UCL_ButtonProperty("ApplySetting")] public bool m_ApplySetting;
+        [UCL.Core.PA.UCL_ButtonAttribute("ApplySetting")] public bool m_ApplySetting;
 
         /// <summary>
         /// Create a Button invoke LoadCurrentSetting()
         /// </summary>
         [Header("Load current EditorBuildSetting into BuildSetting")]
-        [UCL.Core.PA.UCL_ButtonProperty("LoadCurrentSetting")] public bool m_LoadCurrentSetting;
+        [UCL.Core.PA.UCL_ButtonAttribute("LoadCurrentSetting")] public bool m_LoadCurrentSetting;
         /// <summary>
         /// Create a Button invoke Build()
         /// </summary>
         [Header("Apply BuildSetting to EditorBuildSetting and Build")]
-        [UCL.Core.PA.UCL_ButtonProperty("Build")] public bool m_Build;
+        [UCL.Core.PA.UCL_ButtonAttribute("Build")] public bool m_Build;
 
         [Space(10)]
         #endregion
@@ -58,7 +58,7 @@ namespace UCL.BuildLib {
 
         public BuildTargetGroup m_BuildTargetGroup = BuildTargetGroup.Standalone;
         public BuildTarget m_BuildTarget = BuildTarget.StandaloneWindows64;
-        [UCL.Core.PA.UCL_EnumMaskProperty] public BuildOptions m_BuildOption = BuildOptions.None;
+        [UCL.Core.PA.UCL_EnumMask] public BuildOptions m_BuildOption = BuildOptions.None;
         public Texture2D[] m_Icons;
         public bool m_BuildAppBundle = false;
         public string m_OutputPath = "";
