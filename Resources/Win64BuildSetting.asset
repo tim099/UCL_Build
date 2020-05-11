@@ -15,6 +15,7 @@ MonoBehaviour:
   m_ApplySetting: 0
   m_LoadCurrentSetting: 0
   m_Build: 0
+  m_OpenOutputFolder: 0
   m_DefaultSetting: {fileID: 0}
   m_ProductName: UCLibWin64
   m_ApplicationIdentifier: 
@@ -22,6 +23,7 @@ MonoBehaviour:
   m_BuildTarget: 19
   m_BuildOption: 0
   m_Icons: []
+  m_DefaultIcon: {fileID: 10309, guid: 0000000000000000f000000000000000, type: 0}
   m_BuildAppBundle: 0
   m_OutputPath: Build/PC/
   m_OutputName: UCLWin64.exe

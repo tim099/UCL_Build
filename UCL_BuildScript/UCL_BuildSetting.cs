@@ -65,6 +65,7 @@ namespace UCL.BuildLib {
         public BuildTarget m_BuildTarget = BuildTarget.StandaloneWindows64;
         [UCL.Core.PA.UCL_EnumMask] public BuildOptions m_BuildOption = BuildOptions.None;
         public Texture2D[] m_Icons;
+        public Texture2D m_DefaultIcon;
         public bool m_BuildAppBundle = false;
         public string m_OutputPath = "";
         public string m_OutputName = "";
@@ -220,6 +221,9 @@ namespace UCL.BuildLib {
             }
             */
         }
+        protected void SetIcon(Texture2D icon) {
+            PlayerSettings.SetIconsForTargetGroup(BuildTargetGroup.Unknown , new Texture2D[] { icon });
+        }
         protected void SetIcons(Texture2D[] icons) {
             if(icons == null || icons.Length == 0) return;
             int[] iconSizes = PlayerSettings.GetIconSizesForTargetGroup(m_BuildTargetGroup);
@@ -272,6 +276,13 @@ namespace UCL.BuildLib {
             m_BuildOption = player_options.options;
             //m_BuildOption = BuildPlayerWindow.DefaultBuildMethods.GetBuildPlayerOptions(defaultOptions).options;
             m_Icons = PlayerSettings.GetIconsForTargetGroup(m_BuildTargetGroup);
+            var default_Icon = PlayerSettings.GetIconsForTargetGroup(BuildTargetGroup.Unknown);
+            if(default_Icon != null && default_Icon.Length > 0) {
+                m_DefaultIcon = default_Icon[0];
+            } else {
+                m_DefaultIcon = null;
+            }
+            
         }
         static public BuildPlayerOptions GetBuildPlayerOptions() {
             try {
@@ -325,7 +336,11 @@ namespace UCL.BuildLib {
             } else if(default_setting != null) {
                 SetIcons(default_setting.m_Icons);
             }
-
+            if(m_DefaultIcon != null) {
+                SetIcon(m_DefaultIcon);
+            } else if(default_setting != null) {
+                SetIcon(default_setting.m_DefaultIcon);
+            }
             if(PlayerSettings.GetScriptingDefineSymbolsForGroup(m_BuildTargetGroup) != m_ScriptingDefineSymbols) {
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(m_BuildTargetGroup, m_ScriptingDefineSymbols);
             }
