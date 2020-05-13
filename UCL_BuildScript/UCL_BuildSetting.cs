@@ -32,6 +32,15 @@ namespace UCL.BuildLib {
         /// </summary>
         [Header("Open OutputFolder")]
         [UCL.Core.PA.UCL_ButtonAttribute("OpenOutputFolder")] public bool m_OpenOutputFolder;
+        public void OpenOutputFolder() {
+            string path = Core.FileLib.EditorLib.OpenAssetsFolderPanel(m_OutputPath);
+            Debug.LogWarning("path:" + path);
+            if(!string.IsNullOrEmpty(path)) {
+                m_OutputPath = path;
+                Application.OpenURL(Application.dataPath.Replace("Assets", path));
+            }
+        }
+
         [Space(10)]
         #endregion
 
@@ -179,16 +188,6 @@ namespace UCL.BuildLib {
         public void Build() {
             ApplySetting();
             PerformBuild(m_OutputPath);
-        }
-        public void OpenOutputFolder() {
-            string build_path = Application.dataPath.Replace("Assets", m_OutputPath);
-            string path = UnityEditor.EditorUtility.OpenFolderPanel("Select Output Folder", build_path, "");
-            Debug.LogWarning("path:" + path);
-            /*
-            if(!string.IsNullOrEmpty(path) && path != folder) {
-                Application.OpenURL(path);
-            }
-            */
         }
         void ApplyDefaultSetting() {
             PlayerSettings.productName = m_ProductName;
