@@ -6,6 +6,9 @@ using System.Reflection;
 using UnityEditor;
 #endif
 namespace UCL.BuildLib {
+#if UNITY_EDITOR
+    [Core.ATTR.EnableUCLEditor]
+#endif
     [CreateAssetMenu(fileName = "New BuildSetting", menuName = "UCL/BuildSetting")]
     public class UCL_BuildSetting : ScriptableObject {
 #if UNITY_EDITOR
@@ -224,16 +227,21 @@ namespace UCL.BuildLib {
             PlayerSettings.SetIconsForTargetGroup(m_BuildTargetGroup, tmp_icon);
             //PlayerSettings.SetPlatformIcons(m_BuildTargetGroup, m_Icons);
         }
+        [Core.ATTR.UCL_FunctionButton]
+        public void LoadCurrentKeystore() {
+            m_KeystoreName = PlayerSettings.Android.keystoreName;
+            m_KeystorePass = PlayerSettings.keystorePass;
+            m_KeyaliasName = PlayerSettings.Android.keyaliasName;
+            m_KeyaliasPass = PlayerSettings.keyaliasPass;
+            EditorUtility.SetDirty(this);
+        }
         public void LoadCurrentSetting() {
             m_BuildTarget = EditorUserBuildSettings.activeBuildTarget;
             m_BuildTargetGroup = BuildPipeline.GetBuildTargetGroup(m_BuildTarget);
 
             m_ProductName = PlayerSettings.productName;
 
-            m_KeystoreName = PlayerSettings.Android.keystoreName;
-            m_KeystorePass = PlayerSettings.keystorePass;
-            m_KeyaliasName = PlayerSettings.Android.keyaliasName;
-            m_KeyaliasPass = PlayerSettings.keyaliasPass;
+            LoadCurrentKeystore();
 
             m_BuildAppBundle = EditorUserBuildSettings.buildAppBundle;
             
@@ -268,7 +276,7 @@ namespace UCL.BuildLib {
             } else {
                 m_DefaultIcon = null;
             }
-            
+            EditorUtility.SetDirty(this);
         }
         static public BuildPlayerOptions GetBuildPlayerOptions() {
             try {
