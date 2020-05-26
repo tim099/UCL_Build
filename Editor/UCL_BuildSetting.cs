@@ -235,6 +235,31 @@ namespace UCL.BuildLib {
             m_KeyaliasPass = PlayerSettings.keyaliasPass;
             EditorUtility.SetDirty(this);
         }
+        [Core.ATTR.UCL_FunctionButton]
+        public void UpdateVersion() {
+            string ver = PlayerSettings.bundleVersion;
+            var strs = ver.Split('.');
+            if(strs.Length > 0) {
+                int val = int.Parse(strs[strs.Length - 1]);
+                val++;
+                ver = "";
+                for(int i = 0; i < strs.Length - 1; i++) {
+                    ver += strs[i] + ".";
+                }
+                ver += val.ToString();
+                PlayerSettings.bundleVersion = ver;
+            }
+            UpdateBundleVersion();
+        }
+        public void UpdateBundleVersion() {
+            PlayerSettings.Android.bundleVersionCode++;
+            try {
+                PlayerSettings.iOS.buildNumber = (int.Parse(PlayerSettings.iOS.buildNumber) + 1).ToString();
+            } catch(Exception e) {
+                PlayerSettings.iOS.buildNumber = "1";
+                Debug.LogError(e);
+            }
+        }
         public void LoadCurrentSetting() {
             m_BuildTarget = EditorUserBuildSettings.activeBuildTarget;
             m_BuildTargetGroup = BuildPipeline.GetBuildTargetGroup(m_BuildTarget);
