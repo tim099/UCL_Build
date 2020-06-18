@@ -202,7 +202,7 @@ namespace UCL.BuildLib {
             EditorUserBuildSettings.buildAppBundle = m_BuildAppBundle;
 
             if(!string.IsNullOrEmpty(m_ApplicationIdentifier)) {
-                PlayerSettings.applicationIdentifier = m_ApplicationIdentifier;
+                PlayerSettings.SetApplicationIdentifier(m_BuildTargetGroup, m_ApplicationIdentifier);
             }
             /*
             if(PlayerSettings.GetScriptingDefineSymbolsForGroup(m_BuildTargetGroup) != m_ScriptingDefineSymbols) {
@@ -331,7 +331,7 @@ namespace UCL.BuildLib {
             }
             EditorUserBuildSettings.SwitchActiveBuildTarget(m_BuildTargetGroup, m_BuildTarget);
             if(!string.IsNullOrEmpty(m_ApplicationIdentifier)) {
-                PlayerSettings.applicationIdentifier = m_ApplicationIdentifier;
+                PlayerSettings.SetApplicationIdentifier(m_BuildTargetGroup, m_ApplicationIdentifier);
             }
             
             if(!string.IsNullOrEmpty(m_ProductName)) {
