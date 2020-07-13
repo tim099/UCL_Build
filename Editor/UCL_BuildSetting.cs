@@ -62,15 +62,14 @@ namespace UCL.BuildLib {
 
         public BuildTargetGroup m_BuildTargetGroup = BuildTargetGroup.Standalone;
         public BuildTarget m_BuildTarget = BuildTarget.StandaloneWindows64;
-        [UCL.Core.PA.UCL_EnumMask] public BuildOptions m_BuildOption = BuildOptions.None;
+        [UCL.Core.PA.UCL_EnumMask(m_DrawProperty = true)] public BuildOptions m_BuildOption = BuildOptions.None;
         public Texture2D[] m_Icons;
         public Texture2D m_DefaultIcon;
         public bool m_BuildAppBundle = false;
         public string m_OutputPath = "";
         public string m_OutputName = "";
         [Header("Use Editor Setting if m_ScenesInBuild is Empty.")]
-        public UnityEngine.Object[] m_ScenesInBuild;
-
+        public SceneAsset[] m_ScenesInBuild;
         #region KeyStore
         [Header("Key Store")]
         public string m_KeystoreName = "";
@@ -168,6 +167,40 @@ namespace UCL.BuildLib {
             Debug.LogWarning("PerformBuild output_path:" + output_path);
             var res = BuildPipeline.BuildPlayer(GetScenesPath(), output_path, m_BuildTarget , m_BuildOption);
         }
+        public string GetScenePath(string scene_name) {
+            string scene_path = "";
+#if UNITY_EDITOR
+            for(int i = 0; i < m_ScenesInBuild.Length; i++) {
+                var scene = m_ScenesInBuild[i];
+                if(scene.name == scene_name) {
+                    scene_path = AssetDatabase.GetAssetPath(scene.GetInstanceID());
+                }
+            }
+#endif
+            if(string.IsNullOrEmpty(scene_path)) {//m_ScenesInBuild.Length == 0
+                scene_path = UCL.SceneLib.Lib.GetScenePath(scene_name);
+            }
+            return scene_path;
+        }
+        public string[] GetScenesName() {
+            string[] ScenesName = null;
+
+            UnityEngine.Object[] ScenesInBuild = m_ScenesInBuild;
+            if((ScenesInBuild == null || ScenesInBuild.Length == 0) && m_DefaultSetting != null) ScenesInBuild = m_DefaultSetting.m_ScenesInBuild;
+
+            if(ScenesInBuild != null && ScenesInBuild.Length > 0) {
+                ScenesName = new string[ScenesInBuild.Length];
+                List<string> ScenesNameList = new List<string>();
+                for(int i = 0; i < ScenesInBuild.Length; i++) {
+                    var scene = ScenesInBuild[i];
+                    ScenesName[i] = scene.name;
+                }
+            } else {
+                ScenesName = UCL.SceneLib.Lib.GetScenesName();
+            }
+
+            return ScenesName;
+        }
         public string[] GetScenesPath() {
             string[] ScenesPath = null;
             UnityEngine.Object[] ScenesInBuild = m_ScenesInBuild;
@@ -179,7 +212,7 @@ namespace UCL.BuildLib {
                     ScenesPathList.Add(AssetDatabase.GetAssetPath(scene.GetInstanceID()));
                 }
                 ScenesPath = ScenesPathList.ToArray();
-            }else {
+            } else {
                 ScenesPath = UCL.SceneLib.Lib.GetAcitveScenesPath();
             }
             for(int i = 0; i < ScenesPath.Length; i++) {
@@ -261,6 +294,9 @@ namespace UCL.BuildLib {
             }
         }
         public void LoadCurrentSetting() {
+            //EditorBuildSettings.AddConfigObject
+            //https://docs.unity3d.com/ScriptReference/EditorBuildSettings.AddConfigObject.html
+
             m_BuildTarget = EditorUserBuildSettings.activeBuildTarget;
             m_BuildTargetGroup = BuildPipeline.GetBuildTargetGroup(m_BuildTarget);
 
@@ -287,7 +323,7 @@ namespace UCL.BuildLib {
             try {
                 string path = Application.dataPath.Replace("Assets", "");
                 Debug.LogWarning("Application.dataPath:" + path);
-                m_OutputPath = player_options.locationPathName.Replace(path, "");
+                m_OutputPath = Core.FileLib.Lib.GetFolderPath(player_options.locationPathName.Replace(path, ""))+"/";
             } catch(Exception e) {
                 Debug.LogError("LoadCurrentSetting() Exception:" + e);
             }
@@ -320,15 +356,33 @@ namespace UCL.BuildLib {
             }
             return default;
         }
+        public void ApplyScenesInBuildSetting() {
+            UCL_BuildSetting default_setting = m_DefaultSetting;
+            if(default_setting == null) {
+                default_setting = GetDefaultSetting();
+            }
+            if(default_setting != null && default_setting != this) {//Load default setting first!!
+                default_setting.ApplyScenesInBuildSetting();
+            }
+            if(m_ScenesInBuild != null && m_ScenesInBuild.Length > 0) {
+                EditorBuildSettingsScene[] scenes = new EditorBuildSettingsScene[m_ScenesInBuild.Length];
+                for(int i = 0; i < scenes.Length; i++) {
+                    var scene = new EditorBuildSettingsScene(AssetDatabase.GetAssetPath(m_ScenesInBuild[i].GetInstanceID()), true);
+                    scenes[i] = scene;
+                }
+                EditorBuildSettings.scenes = scenes;
+            }
+        }
         public void ApplySetting() {
             Debug.Log("SetBuildSetting:" + name +",Prev:"+ GetCurrentSettingPath());
             UCL_BuildSetting default_setting = m_DefaultSetting;
             if(default_setting == null) {
                 default_setting = GetDefaultSetting();
             }
-            if(default_setting!=null && default_setting != this) {//Load default setting first!!
+            if(default_setting != null && default_setting != this) {//Load default setting first!!
                 default_setting.ApplyDefaultSetting();
             }
+            ApplyScenesInBuildSetting();
             EditorUserBuildSettings.SwitchActiveBuildTarget(m_BuildTargetGroup, m_BuildTarget);
             if(!string.IsNullOrEmpty(m_ApplicationIdentifier)) {
                 PlayerSettings.SetApplicationIdentifier(m_BuildTargetGroup, m_ApplicationIdentifier);
@@ -365,7 +419,6 @@ namespace UCL.BuildLib {
             }
 
             EditorUserBuildSettings.buildAppBundle = m_BuildAppBundle;
-
             SetCurrentSettingPath(AssetDatabase.GetAssetPath(this));
             AssetDatabase.SaveAssets();
             
