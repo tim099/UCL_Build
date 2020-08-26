@@ -29,8 +29,9 @@ MonoBehaviour:
   m_OutputPath: 
   m_OutputName: 
   m_ScenesInBuild: []
-  m_KeystoreName: Build/UCL.keystore
-  m_KeystorePass: uclkey
-  m_KeyaliasName: uclibalias
-  m_KeyaliasPass: uclkey
+  m_KeyStoreSetting:
+    m_KeystoreName: Build/UCL.keystore
+    m_KeystorePass: uclkey
+    m_KeyaliasName: uclibalias
+    m_KeyaliasPass: uclkey
   m_ScriptingDefineSymbols: 
