@@ -47,7 +47,7 @@ namespace UCL.BuildLib {
             string path = Core.FileLib.EditorLib.OpenAssetsFolderPanel(m_OutputPath);
             Debug.LogWarning("path:" + path);
             if(!string.IsNullOrEmpty(path)) {
-                m_OutputPath = path;
+                m_OutputPath = path + "/";
                 Application.OpenURL(Application.dataPath.Replace("Assets", path));
             }
         }
