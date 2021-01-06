@@ -45,6 +45,9 @@ namespace UCL.BuildLib {
         [UCL.Core.PA.UCL_ButtonAttribute("OpenOutputFolder")] public bool m_OpenOutputFolder;
         public void OpenOutputFolder() {
             string path = Core.FileLib.EditorLib.OpenAssetsFolderPanel(m_OutputPath);
+#if UNITY_EDITOR_WIN
+            Core.FileLib.WindowsLib.OpenAssetExplorer(path);
+#endif
             Debug.LogWarning("path:" + path);
             if(!string.IsNullOrEmpty(path)) {
                 m_OutputPath = path + "/";
@@ -53,7 +56,7 @@ namespace UCL.BuildLib {
         }
 
         [Space(10)]
-        #endregion
+#endregion
 
         /// <summary>
         /// DefaultSettingg this BuildSetting Base On
@@ -74,11 +77,11 @@ namespace UCL.BuildLib {
         public Texture2D[] m_Icons;
         public Texture2D m_DefaultIcon;
         public bool m_BuildAppBundle = false;
-        public string m_OutputPath = "";
+        [Header("OutputFolder etc. Build/PC/")]public string m_OutputPath = "";
         public string m_OutputName = "";
         [Header("Use Editor Setting if m_ScenesInBuild is Empty.")]
         public SceneAsset[] m_ScenesInBuild;
-        #region KeyStore
+            #region KeyStore
         [Header("Key Store")]
         public KeyStoreSetting m_KeyStoreSetting = new KeyStoreSetting();
 
@@ -86,7 +89,7 @@ namespace UCL.BuildLib {
         //public string m_KeystorePass = "";
         //public string m_KeyaliasName = "";
         //public string m_KeyaliasPass = "";
-        #endregion
+            #endregion
         [Header("Define Symbols not apply DefaultBuildSetting")]
         public string m_ScriptingDefineSymbols = "";
 
@@ -157,7 +160,6 @@ namespace UCL.BuildLib {
 
         }
 
-
         void PerformBuild(string path) {
             Debug.LogWarning("PerformBuild path:" + path);
             Debug.LogWarning("PerformBuild target:" + m_BuildTarget.ToString());
@@ -175,7 +177,11 @@ namespace UCL.BuildLib {
             }
             string output_path = build_path + m_OutputName;
             Debug.LogWarning("PerformBuild output_path:" + output_path);
+            Core.FileLib.Lib.CreateDirectory(build_path);
             var res = BuildPipeline.BuildPlayer(GetScenesPath(), output_path, m_BuildTarget , m_BuildOption);
+#if UNITY_EDITOR_WIN
+            Core.FileLib.WindowsLib.OpenExplorer(build_path.RemoveLast());
+#endif
         }
         public string GetScenePath(string scene_name) {
             string scene_path = "";
@@ -434,5 +440,5 @@ namespace UCL.BuildLib {
             
         }
 #endif
+        }
     }
-}
