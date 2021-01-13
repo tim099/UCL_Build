@@ -44,7 +44,7 @@ namespace UCL.BuildLib {
         [Header("Open OutputFolder")]
         [UCL.Core.PA.UCL_ButtonAttribute("OpenOutputFolder")] public bool m_OpenOutputFolder;
         public void OpenOutputFolder() {
-            string path = Core.FileLib.EditorLib.OpenAssetsFolderPanel(m_OutputPath);
+            string path = Core.FileLib.EditorLib.OpenAssetsFolderExplorer(m_OutputPath);
 #if UNITY_EDITOR_WIN
             Core.FileLib.WindowsLib.OpenAssetExplorer(path);
 #endif
