@@ -19,6 +19,58 @@ namespace UCL.BuildLib {
             public string m_KeyaliasName;
             public string m_KeyaliasPass;
         }
+        [System.Serializable]
+        public class VersionSetting {
+            /// <summary>
+            /// Bundle Version
+            /// </summary>
+            public string m_BundleVersion = "1.0.0";
+
+            /// <summary>
+            /// Android bundleVersionCode
+            /// </summary>
+            public int m_BundleVersionCode = 1;
+
+            /// <summary>
+            /// IOS buildNumber
+            /// </summary>
+            public string m_BuildNumber = "1";
+
+            public void UpdateVersion() {
+                string ver = m_BundleVersion;
+                var strs = ver.Split('.');
+                if(strs.Length > 0) {
+                    int val = int.Parse(strs[strs.Length - 1]);
+                    val++;
+                    ver = "";
+                    for(int i = 0; i < strs.Length - 1; i++) {
+                        ver += strs[i] + ".";
+                    }
+                    ver += val.ToString();
+                    m_BundleVersion = ver;
+                }
+                UpdateBundleVersion();
+            }
+            public void UpdateBundleVersion() {
+                m_BundleVersionCode++;
+                int val = 0;
+                if(int.TryParse(m_BuildNumber, out val)) {
+                    m_BuildNumber = (val + 1).ToString();
+                } else {
+                    m_BuildNumber = "1";
+                }
+            }
+            public void ApplySetting() {
+                PlayerSettings.bundleVersion = m_BundleVersion;
+                PlayerSettings.Android.bundleVersionCode = m_BundleVersionCode;
+                PlayerSettings.iOS.buildNumber = m_BuildNumber;
+            }
+            public void LoadCurrentSetting() {
+                m_BundleVersion = PlayerSettings.bundleVersion;
+                m_BundleVersionCode = PlayerSettings.Android.bundleVersionCode;
+                m_BuildNumber = PlayerSettings.iOS.buildNumber;
+            }
+        }
 #if UNITY_EDITOR
         #region InspectorButton
         /// <summary>
@@ -81,15 +133,15 @@ namespace UCL.BuildLib {
         public string m_OutputName = "";
         [Header("Use Editor Setting if m_ScenesInBuild is Empty.")]
         public SceneAsset[] m_ScenesInBuild;
-            #region KeyStore
+        #region KeyStore
         [Header("Key Store")]
         public KeyStoreSetting m_KeyStoreSetting = new KeyStoreSetting();
+        #endregion
 
-        //public string m_KeystoreName = "";
-        //public string m_KeystorePass = "";
-        //public string m_KeyaliasName = "";
-        //public string m_KeyaliasPass = "";
-            #endregion
+        #region VersionSetting
+        [Header("VersionSetting")]
+        public VersionSetting m_VersionSetting = new VersionSetting();
+        #endregion
         [Header("Define Symbols not apply DefaultBuildSetting")]
         public string m_ScriptingDefineSymbols = "";
 
@@ -286,28 +338,16 @@ namespace UCL.BuildLib {
         }
         [Core.ATTR.UCL_FunctionButton]
         public void UpdateVersion() {
-            string ver = PlayerSettings.bundleVersion;
-            var strs = ver.Split('.');
-            if(strs.Length > 0) {
-                int val = int.Parse(strs[strs.Length - 1]);
-                val++;
-                ver = "";
-                for(int i = 0; i < strs.Length - 1; i++) {
-                    ver += strs[i] + ".";
-                }
-                ver += val.ToString();
-                PlayerSettings.bundleVersion = ver;
-            }
-            UpdateBundleVersion();
+            m_VersionSetting.UpdateVersion();
+            m_VersionSetting.ApplySetting();
         }
-        public void UpdateBundleVersion() {
-            PlayerSettings.Android.bundleVersionCode++;
-            try {
-                PlayerSettings.iOS.buildNumber = (int.Parse(PlayerSettings.iOS.buildNumber) + 1).ToString();
-            } catch(Exception e) {
-                PlayerSettings.iOS.buildNumber = "1";
-                Debug.LogError(e);
-            }
+        [Core.ATTR.UCL_FunctionButton]
+        public void LoadVersionSetting() {
+            m_VersionSetting.LoadCurrentSetting();
+        }
+        [Core.ATTR.UCL_FunctionButton]
+        public void ApplyVersionSetting() {
+            m_VersionSetting.ApplySetting();
         }
         public void LoadCurrentSetting() {
             //EditorBuildSettings.AddConfigObject
