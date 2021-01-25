@@ -102,7 +102,7 @@ namespace UCL.BuildLib {
 #endif
             Debug.LogWarning("path:" + path);
             if(!string.IsNullOrEmpty(path)) {
-                m_OutputPath = path + "/";
+                m_OutputPath = path;// + "/";
                 Application.OpenURL(Application.dataPath.Replace("Assets", path));
             }
         }
@@ -225,6 +225,12 @@ namespace UCL.BuildLib {
                     Debug.LogWarning("Set build_path:"+ str);
                 } else {
                     Debug.LogWarning("-output string.IsNullOrEmpty!!");
+                }
+            }
+            if(build_path.Length > 0) {
+                char aLastChar = build_path[build_path.Length - 1];
+                if(aLastChar != '\\' && aLastChar != '/') {
+                    build_path += '/';
                 }
             }
             string output_path = build_path + m_OutputName;
@@ -379,7 +385,7 @@ namespace UCL.BuildLib {
             try {
                 string path = Application.dataPath.Replace("Assets", "");
                 Debug.LogWarning("Application.dataPath:" + path);
-                m_OutputPath = Core.FileLib.Lib.GetFolderPath(player_options.locationPathName.Replace(path, ""))+"/";
+                m_OutputPath = Core.FileLib.Lib.GetFolderPath(player_options.locationPathName.Replace(path, ""));
             } catch(Exception e) {
                 Debug.LogError("LoadCurrentSetting() Exception:" + e);
             }
