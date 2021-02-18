@@ -383,7 +383,7 @@ namespace UCL.BuildLib {
             //m_BuildTarget = player_options.target;
 
             try {
-                string path = Application.dataPath.Replace("Assets", "");
+                string path = Application.dataPath.Replace("Assets", string.Empty);
                 Debug.LogWarning("Application.dataPath:" + path);
                 m_OutputPath = Core.FileLib.Lib.GetFolderPath(player_options.locationPathName.Replace(path, ""));
             } catch(Exception e) {
