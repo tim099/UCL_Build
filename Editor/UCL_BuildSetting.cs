@@ -95,6 +95,11 @@ namespace UCL.BuildLib {
         /// </summary>
         [Header("Open OutputFolder")]
         [UCL.Core.PA.UCL_ButtonAttribute("OpenOutputFolder")] public bool m_OpenOutputFolder;
+
+        /// <summary>
+        /// Output build log
+        /// </summary>
+        public bool m_OutputBuildLog = false;
         public void OpenOutputFolder() {
             string path = Core.FileLib.EditorLib.OpenAssetsFolderExplorer(m_OutputPath);
 #if UNITY_EDITOR_WIN
@@ -145,6 +150,7 @@ namespace UCL.BuildLib {
         [Header("Define Symbols not apply DefaultBuildSetting")]
         public string m_ScriptingDefineSymbols = "";
 
+        public System.Text.StringBuilder m_LogStringBuilder = null;
         public static UCL_BuildSetting GetSetting(string path) {
             return Resources.Load<UCL_BuildSetting>(path);
             //AssetDatabase.LoadMainAssetAtPath
@@ -211,10 +217,26 @@ namespace UCL.BuildLib {
             }
 
         }
-
+        protected void ThreadedLog(string iMessage, string iStackTrace = "", LogType iType = LogType.Log)
+        {
+            if(m_LogStringBuilder == null)
+            {
+                return;
+            }
+            lock (m_LogStringBuilder)
+            {
+                m_LogStringBuilder.AppendLine(iMessage);
+            }
+        }
         void PerformBuild(string path) {
+            if (m_OutputBuildLog)
+            {
+                m_LogStringBuilder = new System.Text.StringBuilder();
+                Application.logMessageReceivedThreaded += ThreadedLog;
+            }
             Debug.LogWarning("PerformBuild path:" + path);
             Debug.LogWarning("PerformBuild target:" + m_BuildTarget.ToString());
+
             string build_path = Application.dataPath.Replace("Assets", path);
             if(UnityEditorInternal.InternalEditorUtility.inBatchMode) {
                 Debug.LogWarning("UnityEditorInternal.InternalEditorUtility.inBatchMode == true");
@@ -236,7 +258,16 @@ namespace UCL.BuildLib {
             string output_path = build_path + m_OutputName;
             Debug.LogWarning("PerformBuild output_path:" + output_path);
             Core.FileLib.Lib.CreateDirectory(build_path);
-            var res = BuildPipeline.BuildPlayer(GetScenesPath(), output_path, m_BuildTarget , m_BuildOption);
+            var aResult = BuildPipeline.BuildPlayer(GetScenesPath(), output_path, m_BuildTarget , m_BuildOption);
+            if (m_OutputBuildLog)
+            {
+                System.IO.File.WriteAllText(build_path + "BuildReport.txt", aResult.summary.UCL_ToString());
+                Application.logMessageReceivedThreaded -= ThreadedLog;
+                if (m_LogStringBuilder != null)
+                {
+                    System.IO.File.WriteAllText(build_path + "BuildLog.txt", m_LogStringBuilder.ToString());
+                }
+            }
 #if UNITY_EDITOR_WIN
             Core.FileLib.WindowsLib.OpenExplorer(build_path.RemoveLast());
 #endif
