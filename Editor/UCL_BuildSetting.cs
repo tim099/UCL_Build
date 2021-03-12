@@ -449,6 +449,10 @@ namespace UCL.BuildLib {
             }
             return default;
         }
+        /// <summary>
+        /// Apply scenes in BuildSetting to Editor
+        /// 把BuildSetting中的建置場景套用到Editor
+        /// </summary>
         public void ApplyScenesInBuildSetting() {
             UCL_BuildSetting default_setting = m_DefaultSetting;
             if(default_setting == null) {
