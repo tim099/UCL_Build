@@ -156,7 +156,7 @@ namespace UCL.BuildLib {
             //AssetDatabase.LoadMainAssetAtPath
         }
         public static UCL_BuildSetting GetSettingByPath(string path) {
-            return AssetDatabase.LoadMainAssetAtPath(path) as UCL_BuildSetting;
+            return UCL.Core.EditorLib.AssetDatabaseMapper.LoadMainAssetAtPath(path) as UCL_BuildSetting;
         }
         public static UCL_BuildSetting GetDefaultSetting() {
             return GetSetting("DefaultBuildSetting");
@@ -173,7 +173,7 @@ namespace UCL.BuildLib {
         }
         [UnityEditor.MenuItem("UCL/BuildLib/DefaultBuildSetting")]
         public static void SelectDefaultSetting() {
-            UnityEditor.Selection.activeObject = GetSetting("DefaultBuildSetting");
+            UCL.Core.EditorLib.SelectionMapper.activeObject = GetSetting("DefaultBuildSetting");
         }
         static string GetArg(string arg = "-output") {
             var args = Environment.GetCommandLineArgs();
