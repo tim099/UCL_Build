@@ -2,13 +2,10 @@
 using UnityEngine;
 using System;
 using System.Reflection;
-#if UNITY_EDITOR
 using UnityEditor;
-#endif
+
 namespace UCL.BuildLib {
-#if UNITY_EDITOR
     [Core.ATTR.EnableUCLEditor]
-#endif
     [CreateAssetMenu(fileName = "New BuildSetting", menuName = "UCL/BuildSetting")]
     public class UCL_BuildSetting : ScriptableObject {
         [System.Serializable]
@@ -71,30 +68,29 @@ namespace UCL.BuildLib {
                 m_BuildNumber = PlayerSettings.iOS.buildNumber;
             }
         }
-#if UNITY_EDITOR
         #region InspectorButton
         /// <summary>
         /// Create a Button invoke SetSetting()
         /// </summary>
         [Header("Apply BuildSetting to EditorBuildSetting")]
-        [UCL.Core.PA.UCL_ButtonAttribute("ApplySetting")] public bool m_ApplySetting;
+        [UCL.Core.PA.UCL_Button("ApplySetting")] public bool m_ApplySetting;
 
         /// <summary>
         /// Create a Button invoke LoadCurrentSetting()
         /// </summary>
         [Header("Load current EditorBuildSetting into BuildSetting")]
-        [UCL.Core.PA.UCL_ButtonAttribute("LoadCurrentSetting")] public bool m_LoadCurrentSetting;
+        [UCL.Core.PA.UCL_Button("LoadCurrentSetting")] public bool m_LoadCurrentSetting;
         /// <summary>
         /// Create a Button invoke Build()
         /// </summary>
         [Header("Apply BuildSetting to EditorBuildSetting and Build")]
-        [UCL.Core.PA.UCL_ButtonAttribute("Build")] public bool m_Build;
+        [UCL.Core.PA.UCL_Button("Build")] public bool m_Build;
 
         /// <summary>
         /// Create a Button invoke OpenOutputFolder()
         /// </summary>
         [Header("Open OutputFolder")]
-        [UCL.Core.PA.UCL_ButtonAttribute("OpenOutputFolder")] public bool m_OpenOutputFolder;
+        [UCL.Core.PA.UCL_Button("OpenOutputFolder")] public bool m_OpenOutputFolder;
 
         /// <summary>
         /// Output build log
@@ -371,7 +367,7 @@ namespace UCL.BuildLib {
             m_KeyStoreSetting.m_KeystorePass = PlayerSettings.keystorePass;
             m_KeyStoreSetting.m_KeyaliasName = PlayerSettings.Android.keyaliasName;
             m_KeyStoreSetting.m_KeyaliasPass = PlayerSettings.keyaliasPass;
-            EditorUtility.SetDirty(this);
+            UCL.Core.EditorLib.EditorUtilityMapper.SetDirty(this);
         }
         [Core.ATTR.UCL_FunctionButton]
         public void UpdateVersion() {
@@ -430,7 +426,7 @@ namespace UCL.BuildLib {
             } else {
                 m_DefaultIcon = null;
             }
-            EditorUtility.SetDirty(this);
+            UCL.Core.EditorLib.EditorUtilityMapper.SetDirty(this);
         }
         static public BuildPlayerOptions GetBuildPlayerOptions() {
             try {
@@ -520,6 +516,5 @@ namespace UCL.BuildLib {
             AssetDatabase.SaveAssets();
             
         }
-#endif
-        }
     }
+}
