@@ -268,20 +268,20 @@ namespace UCL.BuildLib {
             Core.FileLib.WindowsLib.OpenExplorer(build_path.RemoveLast());
 #endif
         }
-        public string GetScenePath(string scene_name) {
-            string scene_path = "";
+        public string GetScenePath(string iSceneName) {
+            string aScenePath = "";
 #if UNITY_EDITOR
             for(int i = 0; i < m_ScenesInBuild.Length; i++) {
-                var scene = m_ScenesInBuild[i];
-                if(scene.name == scene_name) {
-                    scene_path = AssetDatabase.GetAssetPath(scene.GetInstanceID());
+                var aScene = m_ScenesInBuild[i];
+                if(aScene.name == iSceneName) {
+                    aScenePath = UCL.Core.EditorLib.AssetDatabaseMapper.GetAssetPath(aScene.GetInstanceID());
                 }
             }
 #endif
-            if(string.IsNullOrEmpty(scene_path)) {//m_ScenesInBuild.Length == 0
-                scene_path = UCL.SceneLib.Lib.GetScenePath(scene_name);
+            if(string.IsNullOrEmpty(aScenePath)) {//m_ScenesInBuild.Length == 0
+                aScenePath = UCL.SceneLib.Lib.GetScenePath(iSceneName);
             }
-            return scene_path;
+            return aScenePath;
         }
         public string[] GetScenesName() {
             string[] ScenesName = null;
