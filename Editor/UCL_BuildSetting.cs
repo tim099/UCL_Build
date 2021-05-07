@@ -8,6 +8,40 @@ namespace UCL.BuildLib {
     [Core.ATTR.EnableUCLEditor]
     [CreateAssetMenu(fileName = "New BuildSetting", menuName = "UCL/BuildSetting")]
     public class UCL_BuildSetting : ScriptableObject {
+        #region static
+        public static UCL_BuildSetting GetSetting(string path)
+        {
+            return Resources.Load<UCL_BuildSetting>(path);
+            //AssetDatabase.LoadMainAssetAtPath
+        }
+        public static UCL_BuildSetting GetSettingByPath(string path)
+        {
+            return UCL.Core.EditorLib.AssetDatabaseMapper.LoadMainAssetAtPath(path) as UCL_BuildSetting;
+        }
+        public static UCL_BuildSetting GetDefaultSetting()
+        {
+            return GetSetting("DefaultBuildSetting");
+        }
+        public static string GetCurrentSettingPath()
+        {
+            string str = PlayerPrefs.GetString("Current_UCL_BuildSetting");
+            Debug.LogWarning("GetCurrentSettingName:" + str);
+            return str;
+        }
+        protected static void SetCurrentSettingPath(string name)
+        {
+            PlayerPrefs.SetString("Current_UCL_BuildSetting", name);
+            PlayerPrefs.Save();
+            Debug.LogWarning("SetCurrentSettingName:" + name);
+        }
+        [UnityEditor.MenuItem("UCL/BuildLib/DefaultBuildSetting")]
+        public static void SelectDefaultSetting()
+        {
+            UCL.Core.EditorLib.SelectionMapper.activeObject = GetSetting("DefaultBuildSetting");
+        }
+
+        #endregion
+
         [System.Serializable]
         public struct KeyStoreSetting {
             //[Header("Key Store")]
@@ -147,30 +181,7 @@ namespace UCL.BuildLib {
         public string m_ScriptingDefineSymbols = "";
 
         public System.Text.StringBuilder m_LogStringBuilder = null;
-        public static UCL_BuildSetting GetSetting(string path) {
-            return Resources.Load<UCL_BuildSetting>(path);
-            //AssetDatabase.LoadMainAssetAtPath
-        }
-        public static UCL_BuildSetting GetSettingByPath(string path) {
-            return UCL.Core.EditorLib.AssetDatabaseMapper.LoadMainAssetAtPath(path) as UCL_BuildSetting;
-        }
-        public static UCL_BuildSetting GetDefaultSetting() {
-            return GetSetting("DefaultBuildSetting");
-        }
-        public static string GetCurrentSettingPath() {
-            string str = PlayerPrefs.GetString("Current_UCL_BuildSetting");
-            Debug.LogWarning("GetCurrentSettingName:" + str);
-            return str;
-        }
-        protected static void SetCurrentSettingPath(string name) {
-            PlayerPrefs.SetString("Current_UCL_BuildSetting", name);
-            PlayerPrefs.Save();
-            Debug.LogWarning("SetCurrentSettingName:" + name);
-        }
-        [UnityEditor.MenuItem("UCL/BuildLib/DefaultBuildSetting")]
-        public static void SelectDefaultSetting() {
-            UCL.Core.EditorLib.SelectionMapper.activeObject = GetSetting("DefaultBuildSetting");
-        }
+
         static string GetArg(string arg = "-output") {
             var args = Environment.GetCommandLineArgs();
             for(int i = 0; i < args.Length; i++) {
