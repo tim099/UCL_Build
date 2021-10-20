@@ -103,33 +103,13 @@ namespace UCL.BuildLib {
             }
         }
         #region InspectorButton
-        /// <summary>
-        /// Create a Button invoke SetSetting()
-        /// </summary>
-        [Header("Apply BuildSetting to EditorBuildSetting")]
-        [UCL.Core.PA.UCL_Button("ApplySetting")] public bool m_ApplySetting;
-
-        /// <summary>
-        /// Create a Button invoke LoadCurrentSetting()
-        /// </summary>
-        [Header("Load current EditorBuildSetting into BuildSetting")]
-        [UCL.Core.PA.UCL_Button("LoadCurrentSetting")] public bool m_LoadCurrentSetting;
-        /// <summary>
-        /// Create a Button invoke Build()
-        /// </summary>
-        [Header("Apply BuildSetting to EditorBuildSetting and Build")]
-        [UCL.Core.PA.UCL_Button("Build")] public bool m_Build;
-
-        /// <summary>
-        /// Create a Button invoke OpenOutputFolder()
-        /// </summary>
-        [Header("Open OutputFolder")]
-        [UCL.Core.PA.UCL_Button("OpenOutputFolder")] public bool m_OpenOutputFolder;
 
         /// <summary>
         /// Output build log
         /// </summary>
         public bool m_OutputBuildLog = false;
+        [UCL.Core.ATTR.UCL_FunctionButton]
+        [UCL.Core.ATTR.UCL_DrawBeforeDefaultInspector(4)]
         public void OpenOutputFolder() {
             string path = Core.FileLib.EditorLib.OpenAssetsFolderExplorer(m_OutputPath);
 #if UNITY_EDITOR_WIN
@@ -141,9 +121,7 @@ namespace UCL.BuildLib {
                 Application.OpenURL(Application.dataPath.Replace("Assets", path));
             }
         }
-
-        [Space(10)]
-#endregion
+        #endregion
 
         /// <summary>
         /// DefaultSettingg this BuildSetting Base On
@@ -180,7 +158,9 @@ namespace UCL.BuildLib {
         [Header("Define Symbols not apply DefaultBuildSetting")]
         public string m_ScriptingDefineSymbols = "";
 
-        public System.Text.StringBuilder m_LogStringBuilder = null;
+        [SerializeField] protected List<UCL_PreBuildProcess> m_PreBuildProcess = new List<UCL_PreBuildProcess>();
+
+        protected System.Text.StringBuilder m_LogStringBuilder = null;
 
         static string GetArg(string arg = "-output") {
             var args = Environment.GetCommandLineArgs();
@@ -199,22 +179,22 @@ namespace UCL.BuildLib {
         public static void BuildBySetting() {
             try {
                 string prev_setting = GetCurrentSettingPath();
-                UCL_BuildSetting setting = null;
+                UCL_BuildSetting aSetting = null;
                 const string BuildSettingKey = "-buildsetting";
                 string setting_name = GetArg(BuildSettingKey);
                 if(!string.IsNullOrEmpty(setting_name)) {
-                    setting = GetSetting(setting_name);
+                    aSetting = GetSetting(setting_name);
                     Debug.LogWarning("BuildBySetting():" + setting_name);
-                    if(setting == null) {
+                    if(aSetting == null) {
                         Debug.LogError("BuildBySetting GetSetting Fail:" + setting_name);
                     }
                 }
-                if(setting == null) {
-                    setting = GetDefaultSetting();
+                if(aSetting == null) {
+                    aSetting = GetDefaultSetting();
                 }
-                if(setting == null) return;//No Default Setting!!
+                if(aSetting == null) return;//No Default Setting!!
 
-                setting.Build();
+                aSetting.Build();
 
                 if(!string.IsNullOrEmpty(prev_setting)) {//reset to prev setting
                     GetSettingByPath(prev_setting)?.ApplySetting();
@@ -333,9 +313,40 @@ namespace UCL.BuildLib {
             }
             return ScenesPath;
         }
+        [UCL.Core.ATTR.UCL_FunctionButton("Build")]
+        [UCL.Core.ATTR.UCL_DrawBeforeDefaultInspector(1)]
+
+        public void BuildButton()
+        {
+            UCL.Core.ServiceLib.UCL_UpdateService.AddActionStaticVer(() => { Build(); });
+        }
         public void Build() {
             ApplySetting();
-            PerformBuild(m_OutputPath);
+
+            if (m_PreBuildProcess.Count > 0)
+            {
+                BuildData aBuildData = new BuildData(m_OutputPath);
+                int aAt = 0;
+                System.Action aPreBuildAct = null;
+                aPreBuildAct = () =>
+                {
+                    if(aAt < m_PreBuildProcess.Count)
+                    {
+                        m_PreBuildProcess[aAt++].OnBuild(aBuildData, aPreBuildAct);
+                    }
+                    else
+                    {
+                        PerformBuild(m_OutputPath);
+                    }
+                };
+                aPreBuildAct();
+            }
+            else
+            {
+                PerformBuild(m_OutputPath);
+            }
+
+
         }
         void ApplyDefaultSetting() {
             PlayerSettings.productName = m_ProductName;
@@ -393,6 +404,8 @@ namespace UCL.BuildLib {
         public void ApplyVersionSetting() {
             m_VersionSetting.ApplySetting();
         }
+        [UCL.Core.ATTR.UCL_FunctionButton]
+        [UCL.Core.ATTR.UCL_DrawBeforeDefaultInspector(3)]
         public void LoadCurrentSetting() {
             //EditorBuildSettings.AddConfigObject
             //https://docs.unity3d.com/ScriptReference/EditorBuildSettings.AddConfigObject.html
@@ -477,6 +490,8 @@ namespace UCL.BuildLib {
                 EditorBuildSettings.scenes = scenes;
             }
         }
+        [UCL.Core.ATTR.UCL_FunctionButton]
+        [UCL.Core.ATTR.UCL_DrawBeforeDefaultInspector(2)]
         public void ApplySetting() {
             Debug.Log("SetBuildSetting:" + name +",Prev:"+ GetCurrentSettingPath());
             UCL_BuildSetting default_setting = m_DefaultSetting;
