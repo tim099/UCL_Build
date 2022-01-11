@@ -318,7 +318,7 @@ namespace UCL.BuildLib {
 
         public void BuildButton()
         {
-            UCL.Core.ServiceLib.UCL_UpdateService.AddActionStaticVer(() => { Build(); });
+            UCL.Core.ServiceLib.UCL_UpdateService.AddAction(Build);
         }
         public void Build() {
             ApplySetting();
