@@ -142,7 +142,11 @@ namespace UCL.BuildLib {
         public Texture2D[] m_Icons;
         public Texture2D m_DefaultIcon;
         public bool m_BuildAppBundle = false;
-        [Header("OutputFolder etc. Build/PC/")]public string m_OutputPath = "";
+
+        [Header("OutputFolder etc. Build/PC/")]
+        [UCL.Core.PA.UCL_FolderExplorer(UCL.Core.PA.ExplorerType.AssetsRoot)] 
+        public string m_OutputPath = "";
+
         public string m_OutputName = "";
         [Header("Use Editor Setting if m_ScenesInBuild is Empty.")]
         public SceneAsset[] m_ScenesInBuild;
