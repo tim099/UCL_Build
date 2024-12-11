@@ -356,9 +356,9 @@ namespace UCL.BuildLib {
             PlayerSettings.productName = m_ProductName;
             PlayerSettings.Android.keystoreName = Application.dataPath.Replace("Assets",m_KeyStoreSetting.m_KeystoreName);
 
-            PlayerSettings.keystorePass = m_KeyStoreSetting.m_KeystorePass;
+            PlayerSettings.Android.keystorePass = m_KeyStoreSetting.m_KeystorePass;
             PlayerSettings.Android.keyaliasName = m_KeyStoreSetting.m_KeyaliasName;
-            PlayerSettings.keyaliasPass = m_KeyStoreSetting.m_KeyaliasPass;
+            PlayerSettings.Android.keyaliasPass = m_KeyStoreSetting.m_KeyaliasPass;
             EditorUserBuildSettings.buildAppBundle = m_BuildAppBundle;
 
             if(!string.IsNullOrEmpty(m_ApplicationIdentifier)) {
@@ -390,9 +390,9 @@ namespace UCL.BuildLib {
         [Core.ATTR.UCL_FunctionButton]
         public void LoadCurrentKeystore() {
             m_KeyStoreSetting.m_KeystoreName = PlayerSettings.Android.keystoreName;
-            m_KeyStoreSetting.m_KeystorePass = PlayerSettings.keystorePass;
+            m_KeyStoreSetting.m_KeystorePass = PlayerSettings.Android.keystorePass;
             m_KeyStoreSetting.m_KeyaliasName = PlayerSettings.Android.keyaliasName;
-            m_KeyStoreSetting.m_KeyaliasPass = PlayerSettings.keyaliasPass;
+            m_KeyStoreSetting.m_KeyaliasPass = PlayerSettings.Android.keyaliasPass;
             UCL.Core.EditorLib.EditorUtilityMapper.SetDirty(this);
         }
         [Core.ATTR.UCL_FunctionButton]
@@ -518,13 +518,13 @@ namespace UCL.BuildLib {
                 PlayerSettings.Android.keystoreName = Application.dataPath.Replace("Assets", m_KeyStoreSetting.m_KeystoreName);
             }
             if(!string.IsNullOrEmpty(m_KeyStoreSetting.m_KeystorePass)) {
-                PlayerSettings.keystorePass = m_KeyStoreSetting.m_KeystorePass;
+                PlayerSettings.Android.keystorePass = m_KeyStoreSetting.m_KeystorePass;
             }
             if(!string.IsNullOrEmpty(m_KeyStoreSetting.m_KeyaliasName)) {
                 PlayerSettings.Android.keyaliasName = m_KeyStoreSetting.m_KeyaliasName;
             }
             if(!string.IsNullOrEmpty(m_KeyStoreSetting.m_KeyaliasPass)) {
-                PlayerSettings.keyaliasPass = m_KeyStoreSetting.m_KeyaliasPass;
+                PlayerSettings.Android.keyaliasPass = m_KeyStoreSetting.m_KeyaliasPass;
             }
 
             if(m_Icons != null && m_Icons.Length > 0) {
