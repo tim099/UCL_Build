@@ -1,8 +1,10 @@
 {
     "name": "UCL_Build",
+    "rootNamespace": "",
     "references": [
-        "GUID:fb313712d3efc8045821678f6c8743af",
-        "GUID:526296d227adc804a96a10e871b99dd5"
+        "UCL_Core",
+        "UCL_Scene",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -11,5 +13,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [],
+    "noEngineReferences": false
 }

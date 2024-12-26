@@ -5,6 +5,80 @@ using System.Reflection;
 using UnityEditor;
 
 namespace UCL.BuildLib {
+    [System.Serializable]
+    public struct KeyStoreSetting
+    {
+        //[Header("Key Store")]
+        public string m_KeystoreName;
+        public string m_KeystorePass;
+        public string m_KeyaliasName;
+        public string m_KeyaliasPass;
+    }
+    [System.Serializable]
+    public class VersionSetting
+    {
+        /// <summary>
+        /// Bundle Version
+        /// </summary>
+        public string m_BundleVersion = "1.0.0";
+
+        /// <summary>
+        /// Android bundleVersionCode
+        /// </summary>
+        public int m_BundleVersionCode = 1;
+
+        /// <summary>
+        /// IOS buildNumber
+        /// </summary>
+        public string m_BuildNumber = "1";
+
+        public void UpdateVersion()
+        {
+            string ver = m_BundleVersion;
+            var strs = ver.Split('.');
+            if (strs.Length > 0)
+            {
+                int val = int.Parse(strs[strs.Length - 1]);
+                val++;
+                ver = "";
+                for (int i = 0; i < strs.Length - 1; i++)
+                {
+                    ver += strs[i] + ".";
+                }
+                ver += val.ToString();
+                m_BundleVersion = ver;
+            }
+            UpdateBundleVersion();
+        }
+        public void UpdateBundleVersion()
+        {
+            m_BundleVersionCode++;
+            int val = 0;
+            if (int.TryParse(m_BuildNumber, out val))
+            {
+                m_BuildNumber = (val + 1).ToString();
+            }
+            else
+            {
+                m_BuildNumber = "1";
+            }
+        }
+        public void ApplySetting()
+        {
+            PlayerSettings.bundleVersion = m_BundleVersion;
+            PlayerSettings.Android.bundleVersionCode = m_BundleVersionCode;
+            PlayerSettings.iOS.buildNumber = m_BuildNumber;
+        }
+        public void LoadCurrentSetting()
+        {
+            m_BundleVersion = PlayerSettings.bundleVersion;
+            m_BundleVersionCode = PlayerSettings.Android.bundleVersionCode;
+            m_BuildNumber = PlayerSettings.iOS.buildNumber;
+        }
+    }
+
+
+    [Obsolete("Please use UCL_BuildAsset instead")]
     [Core.ATTR.EnableUCLEditor]
     [CreateAssetMenu(fileName = "New BuildSetting", menuName = "UCL/BuildSetting")]
     public class UCL_BuildSetting : ScriptableObject {
@@ -42,66 +116,7 @@ namespace UCL.BuildLib {
 
         #endregion
 
-        [System.Serializable]
-        public struct KeyStoreSetting {
-            //[Header("Key Store")]
-            public string m_KeystoreName;
-            public string m_KeystorePass;
-            public string m_KeyaliasName;
-            public string m_KeyaliasPass;
-        }
-        [System.Serializable]
-        public class VersionSetting {
-            /// <summary>
-            /// Bundle Version
-            /// </summary>
-            public string m_BundleVersion = "1.0.0";
 
-            /// <summary>
-            /// Android bundleVersionCode
-            /// </summary>
-            public int m_BundleVersionCode = 1;
-
-            /// <summary>
-            /// IOS buildNumber
-            /// </summary>
-            public string m_BuildNumber = "1";
-
-            public void UpdateVersion() {
-                string ver = m_BundleVersion;
-                var strs = ver.Split('.');
-                if(strs.Length > 0) {
-                    int val = int.Parse(strs[strs.Length - 1]);
-                    val++;
-                    ver = "";
-                    for(int i = 0; i < strs.Length - 1; i++) {
-                        ver += strs[i] + ".";
-                    }
-                    ver += val.ToString();
-                    m_BundleVersion = ver;
-                }
-                UpdateBundleVersion();
-            }
-            public void UpdateBundleVersion() {
-                m_BundleVersionCode++;
-                int val = 0;
-                if(int.TryParse(m_BuildNumber, out val)) {
-                    m_BuildNumber = (val + 1).ToString();
-                } else {
-                    m_BuildNumber = "1";
-                }
-            }
-            public void ApplySetting() {
-                PlayerSettings.bundleVersion = m_BundleVersion;
-                PlayerSettings.Android.bundleVersionCode = m_BundleVersionCode;
-                PlayerSettings.iOS.buildNumber = m_BuildNumber;
-            }
-            public void LoadCurrentSetting() {
-                m_BundleVersion = PlayerSettings.bundleVersion;
-                m_BundleVersionCode = PlayerSettings.Android.bundleVersionCode;
-                m_BuildNumber = PlayerSettings.iOS.buildNumber;
-            }
-        }
         #region InspectorButton
 
         /// <summary>
@@ -166,7 +181,7 @@ namespace UCL.BuildLib {
 
         protected System.Text.StringBuilder m_LogStringBuilder = null;
 
-        static string GetArg(string arg = "-output") {
+        public static string GetArg(string arg = "-output") {
             var args = Environment.GetCommandLineArgs();
             for(int i = 0; i < args.Length; i++) {
                 if(args[i].ToLower() == arg) {
