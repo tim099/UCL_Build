@@ -15,6 +15,10 @@ namespace UCL.BuildLib
         {
             m_OutputPath = iOutputPath;
         }
+        /// <summary>
+        /// Output folder path
+        /// 輸出資料夾路徑
+        /// </summary>
         public string m_OutputPath;
     }
     [Obsolete("Please use UCL_PreBuildSetting instead")]

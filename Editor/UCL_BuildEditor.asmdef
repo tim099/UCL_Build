@@ -1,0 +1,23 @@
+{
+    "name": "UCL_BuildEditor",
+    "rootNamespace": "",
+    "references": [
+        "UniTask",
+        "UCL_Core",
+        "UCL_Build",
+        "UCL_Scene",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

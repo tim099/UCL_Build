@@ -14,6 +14,7 @@ using UnityEditor.Build.Profile;
 using UnityEditor.Build.Reporting;
 using System.Linq;
 using System;
+using System.IO;
 
 namespace UCL.BuildLib
 {
@@ -63,6 +64,11 @@ namespace UCL.BuildLib
         /// PreBuildProcess
         /// </summary>
         public List<UCL_PreBuildSetting> m_PreBuildProcess = new ();
+        /// <summary>
+        /// PostBuildProcess
+        /// </summary>
+        public List<UCL_PreBuildSetting> m_PostBuildProcess = new();
+
 
         protected System.Text.StringBuilder m_LogStringBuilder = null;
 
@@ -143,6 +149,14 @@ namespace UCL.BuildLib
                 var settings = AddressableAssetSettingsDefaultObject.Settings;
 
 
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+                if (GUILayout.Button(UCL_LocalizeManager.Get("Open Output folder"), UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
+                {
+                    var path = GetBuildPath(m_OutputPath);
+                    Directory.CreateDirectory(path);
+                    UCL.Core.FileLib.WindowsLib.OpenExplorer(path);
+                }
+#endif
 
                 if (GUILayout.Button(UCL_LocalizeManager.Get("Build"), UCL.Core.UI.UCL_GUIStyle.ButtonStyle))
                 {
@@ -185,6 +199,7 @@ namespace UCL.BuildLib
             }
             return BuildProfile.GetActiveBuildProfile();
         }
+        protected static string GetBuildPath(string path) => Application.dataPath.Replace("Assets", path);
         virtual protected async Cysharp.Threading.Tasks.UniTask BuildAsync(string path)
         {
             try
@@ -205,7 +220,7 @@ namespace UCL.BuildLib
 
 
 
-                string buildPath = Application.dataPath.Replace("Assets", path);
+                string buildPath = GetBuildPath(path);
                 if (UnityEditorInternal.InternalEditorUtility.inBatchMode)
                 {
                     Debug.LogWarning("UnityEditorInternal.InternalEditorUtility.inBatchMode == true");
@@ -237,7 +252,14 @@ namespace UCL.BuildLib
                 {
                     foreach (var preBuildProcess in m_PreBuildProcess)
                     {
-                        await preBuildProcess.OnBuild(buildData);
+                        try
+                        {
+                            await preBuildProcess.OnBuild(buildData);
+                        }
+                        catch(System.Exception ex)
+                        {
+                            Debug.LogException(ex);
+                        }
                     }
                 }
 
@@ -253,6 +275,20 @@ namespace UCL.BuildLib
                 }
                 var aResult = BuildPipeline.BuildPlayer(scenePaths, outputPath, m_BuildTarget, m_BuildOption);
 
+                if (!m_PostBuildProcess.IsNullOrEmpty())
+                {
+                    foreach (var buildProcess in m_PostBuildProcess)
+                    {
+                        try
+                        {
+                            await buildProcess.OnBuild(buildData);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            Debug.LogException(ex);
+                        }
+                    }
+                }
 
                 if (m_OutputBuildLog)
                 {
