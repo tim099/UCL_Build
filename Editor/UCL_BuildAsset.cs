@@ -61,6 +61,10 @@ namespace UCL.BuildLib
         public bool m_OutputBuildLog = false;
 
         /// <summary>
+        /// Process before Switch BuildProfile
+        /// </summary>
+        public List<UCL_PreBuildSetting> m_PreSwitchBuildProfileProcess = new();
+        /// <summary>
         /// PreBuildProcess
         /// </summary>
         public List<UCL_PreBuildSetting> m_PreBuildProcess = new ();
@@ -204,22 +208,6 @@ namespace UCL.BuildLib
         {
             try
             {
-                var profile = SetBuildProfile();
-                if (profile == null)
-                {
-                    Debug.LogError($"{GetType().Name}.BuildAsync,m_BuildProfile:{m_BuildProfile}, profile == null");
-                    return;
-                }
-                Debug.Log($"{GetType().Name}.BuildAsync,m_BuildProfile:{m_BuildProfile}, profile:{profile.name}");
-                if (m_OutputBuildLog)
-                {
-                    m_LogStringBuilder = new System.Text.StringBuilder();
-                    Application.logMessageReceivedThreaded += ThreadedLog;
-                }
-
-
-
-
                 string buildPath = GetBuildPath(path);
                 if (UnityEditorInternal.InternalEditorUtility.inBatchMode)
                 {
@@ -248,6 +236,41 @@ namespace UCL.BuildLib
                 Debug.LogWarning("PerformBuild output_path:" + outputPath);
                 Core.FileLib.Lib.CreateDirectory(buildPath);
                 BuildData buildData = new BuildData(buildPath);
+
+
+                if (!m_PreSwitchBuildProfileProcess.IsNullOrEmpty())
+                {
+                    foreach (var preBuildProcess in m_PreSwitchBuildProfileProcess)
+                    {
+                        try
+                        {
+                            await preBuildProcess.OnBuild(buildData);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            Debug.LogException(ex);
+                        }
+                    }
+                }
+
+
+                var profile = SetBuildProfile();
+                if (profile == null)
+                {
+                    Debug.LogError($"{GetType().Name}.BuildAsync,m_BuildProfile:{m_BuildProfile}, profile == null");
+                    return;
+                }
+                Debug.Log($"{GetType().Name}.BuildAsync,m_BuildProfile:{m_BuildProfile}, profile:{profile.name}");
+                if (m_OutputBuildLog)
+                {
+                    m_LogStringBuilder = new System.Text.StringBuilder();
+                    Application.logMessageReceivedThreaded += ThreadedLog;
+                }
+
+
+
+
+
                 if (!m_PreBuildProcess.IsNullOrEmpty())
                 {
                     foreach (var preBuildProcess in m_PreBuildProcess)
