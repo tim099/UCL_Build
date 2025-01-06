@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UCL.Core;
+using UCL.Core.UI;
 using UnityEngine;
 
 
@@ -18,8 +19,12 @@ namespace UCL.BuildLib
     }
 
     [UCL.Core.ATTR.UCL_IgnoreInTypeListable]
-    public class UCL_PreBuildSetting : UCLI_PreBuild, UCLI_TypeListable
+    public class UCL_PreBuildSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCLI_PreBuild, UCLI_TypeListable, UCLI_IsEnable
     {
+        public bool m_IsEnable = true;
+
+        public bool IsEnable { get => m_IsEnable; set => m_IsEnable = value; }
+
         virtual public UniTask OnBuild(BuildData iBuildData)
         {
             //var aAllTypes = typeof(UCL_PreBuildSetting).GetAllITypesAssignableFrom();

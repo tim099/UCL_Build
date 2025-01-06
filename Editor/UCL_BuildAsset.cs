@@ -15,6 +15,7 @@ using UnityEditor.Build.Reporting;
 using System.Linq;
 using System;
 using System.IO;
+using Cysharp.Threading.Tasks;
 
 namespace UCL.BuildLib
 {
@@ -204,6 +205,27 @@ namespace UCL.BuildLib
             return BuildProfile.GetActiveBuildProfile();
         }
         protected static string GetBuildPath(string path) => Application.dataPath.Replace("Assets", path);
+        virtual protected async UniTask OnBuildProcess(IEnumerable<UCL_PreBuildSetting> settings, BuildData buildData)
+        {
+            if(settings == null)
+            {
+                return;
+            }
+            foreach (var buildProcess in settings)
+            {
+                try
+                {
+                    if (buildProcess.IsEnable)
+                    {
+                        await buildProcess.OnBuild(buildData);
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+            }
+        }
         virtual protected async Cysharp.Threading.Tasks.UniTask BuildAsync(string path)
         {
             try
@@ -237,21 +259,7 @@ namespace UCL.BuildLib
                 Core.FileLib.Lib.CreateDirectory(buildPath);
                 BuildData buildData = new BuildData(buildPath);
 
-
-                if (!m_PreSwitchBuildProfileProcess.IsNullOrEmpty())
-                {
-                    foreach (var preBuildProcess in m_PreSwitchBuildProfileProcess)
-                    {
-                        try
-                        {
-                            await preBuildProcess.OnBuild(buildData);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            Debug.LogException(ex);
-                        }
-                    }
-                }
+                await OnBuildProcess(m_PreSwitchBuildProfileProcess, buildData);
 
 
                 var profile = SetBuildProfile();
@@ -267,24 +275,7 @@ namespace UCL.BuildLib
                     Application.logMessageReceivedThreaded += ThreadedLog;
                 }
 
-
-
-
-
-                if (!m_PreBuildProcess.IsNullOrEmpty())
-                {
-                    foreach (var preBuildProcess in m_PreBuildProcess)
-                    {
-                        try
-                        {
-                            await preBuildProcess.OnBuild(buildData);
-                        }
-                        catch(System.Exception ex)
-                        {
-                            Debug.LogException(ex);
-                        }
-                    }
-                }
+                await OnBuildProcess(m_PreBuildProcess, buildData);
 
                 var scenes = profile.scenes;
                 string[] scenePaths = null;
@@ -298,20 +289,7 @@ namespace UCL.BuildLib
                 }
                 var aResult = BuildPipeline.BuildPlayer(scenePaths, outputPath, m_BuildTarget, m_BuildOption);
 
-                if (!m_PostBuildProcess.IsNullOrEmpty())
-                {
-                    foreach (var buildProcess in m_PostBuildProcess)
-                    {
-                        try
-                        {
-                            await buildProcess.OnBuild(buildData);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            Debug.LogException(ex);
-                        }
-                    }
-                }
+                await OnBuildProcess(m_PostBuildProcess, buildData);
 
                 if (m_OutputBuildLog)
                 {
