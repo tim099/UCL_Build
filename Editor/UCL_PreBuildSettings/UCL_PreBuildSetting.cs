@@ -21,7 +21,7 @@ namespace UCL.BuildLib
     [UCL.Core.ATTR.UCL_IgnoreInTypeListable]
     public class UCL_PreBuildSetting : UCL.Core.JsonLib.UnityJsonSerializable, UCLI_PreBuild, UCLI_TypeListable, UCLI_IsEnable
     {
-        public bool m_IsEnable = true;
+        [UCL.Core.ATTR.UCL_HideOnGUI] public bool m_IsEnable = true;
 
         public bool IsEnable { get => m_IsEnable; set => m_IsEnable = value; }
 
