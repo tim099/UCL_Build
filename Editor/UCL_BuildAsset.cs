@@ -38,6 +38,44 @@ namespace UCL.BuildLib
 
     public class UCL_BuildAsset : UCL_Asset<UCL_BuildAsset>
     {
+        #region static
+        /// <summary>
+        /// Build in BatchMode
+        /// </summary>
+        public static async void BuildInBatchMode()
+        {
+            if (!UnityEditorInternal.InternalEditorUtility.inBatchMode)
+            {
+                Debug.LogError($"BuildInBatchMode !UnityEditorInternal.InternalEditorUtility.inBatchMode");
+                return;
+            }
+            await UCL_ModuleService.WaitUntilInitialized(default);
+            Debug.Log($"BuildInBatchMode UCL_ModuleService.WaitUntilInitialized");
+            string id = GetArg("-buildasset");
+            string output = GetArg("-output");
+            Debug.Log($"BuildInBatchMode -buildasset:{id}, -output:{output}");
+            var asset = Util.GetData(id);
+
+            await asset.BuildAsync(output);
+        }
+        public static string GetArg(string arg = "-output")
+        {
+            var args = Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i].ToLower() == arg)
+                {
+                    if (i + 1 < args.Length)
+                    {
+                        return args[i + 1];
+                    }
+                }
+            }
+            return null;
+        }
+        #endregion
+
+
         /// <summary>
         /// 要套用的BuildProfile
         /// </summary>
@@ -340,21 +378,6 @@ namespace UCL.BuildLib
             {
                 m_LogStringBuilder.AppendLine(iMessage);
             }
-        }
-        public static string GetArg(string arg = "-output")
-        {
-            var args = Environment.GetCommandLineArgs();
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (args[i].ToLower() == arg)
-                {
-                    if (i + 1 < args.Length)
-                    {
-                        return args[i + 1];
-                    }
-                }
-            }
-            return null;
         }
     }
     public class BuildWithProfile
