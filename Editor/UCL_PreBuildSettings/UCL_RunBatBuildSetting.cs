@@ -98,7 +98,7 @@ namespace UCL.BuildLib
             //{
             //    tcs.TrySetResult((sender, args));
             //};
-            process.Start();
+            //process.Start();
             Debug.Log($"process.Start()");
             process.WaitForExit();
             Debug.Log($"process.WaitForExit");
