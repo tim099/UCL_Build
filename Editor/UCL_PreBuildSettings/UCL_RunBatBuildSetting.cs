@@ -1,11 +1,12 @@
 ﻿
 // RCG_AutoHeader
 // to change the auto header please go to RCG_AutoHeader.cs
-// Create time : 02/08 2025
+// Create time : 02/15 2025
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using UCL.Core;
@@ -15,10 +16,24 @@ using UnityEngine;
 namespace UCL.BuildLib
 {
     [UCL.Core.ATTR.EnableUCLEditor]
-    public class UCL_BashBuildSetting : UCL_PreBuildSetting
+    public class UCL_RunBatBuildSetting : UCL_PreBuildSetting
     {
-        public string m_FileName = "cmd.exe";//"/bin/bash";
-        public string m_Arguments = "/c echo Hello, World!";//"-c echo Hello, World!";
+        public enum EPathConfig
+        {
+            /// <summary>
+            /// System.IO.Directory.GetParent(Application.dataPath).FullName;
+            /// </summary>
+            ParentOfDataPath,
+            /// <summary>
+            /// System.IO.Directory.GetParent(Application.dataPath).Parent.FullName;
+            /// </summary>
+            ParentOfParentOfDataPath,
+        }
+
+        public EPathConfig m_PathConfig = EPathConfig.ParentOfDataPath;
+        public string m_FolderPath = "";
+        public string m_FileName = "FileName.bat";
+
         public bool m_CreateNoWindow = true;
         public bool m_UseShellExecute = false;
 
@@ -28,7 +43,21 @@ namespace UCL.BuildLib
         {
             await RunCommand();
         }
-
+        public string GetPath()
+        {
+            switch (m_PathConfig)
+            {
+                case EPathConfig.ParentOfDataPath:
+                    {
+                        return System.IO.Directory.GetParent(Application.dataPath).FullName;
+                    }
+                case EPathConfig.ParentOfParentOfDataPath:
+                    {
+                        return System.IO.Directory.GetParent(Application.dataPath).Parent.FullName;
+                    }
+            }
+            return string.Empty;
+        }
         [UCL.Core.ATTR.UCL_FunctionButton]
         public void RunScript()
         {
@@ -43,14 +72,22 @@ namespace UCL.BuildLib
 
         private async UniTask RunCommand()
         {
-            Debug.Log($"RunCommand m_FileName:{m_FileName}, m_Arguments:{m_Arguments}");
             await UniTask.SwitchToThreadPool();
-            //var tcs = new UniTaskCompletionSource<(object sender, EventArgs args)>();
-            System.Diagnostics.Process process = new();
-            process.StartInfo.FileName = m_FileName;
-            process.StartInfo.Arguments = m_Arguments;
-            process.StartInfo.CreateNoWindow = m_CreateNoWindow;
-            process.StartInfo.UseShellExecute = m_UseShellExecute;
+            var dir = GetPath();
+            var folderPath = Path.Combine(dir, m_FolderPath);
+            var path = Path.Combine(folderPath, m_FileName);
+
+            Debug.Log($"dir:{dir}, folderPath:{folderPath},path:{path}");
+
+            System.Diagnostics.ProcessStartInfo processStartInfo = new(path)
+            {
+                CreateNoWindow = m_CreateNoWindow,
+                UseShellExecute = m_UseShellExecute,
+                WorkingDirectory = folderPath,
+            };
+            System.Diagnostics.Process process = System.Diagnostics.Process.Start(processStartInfo);
+
+
             if (!m_UseShellExecute)
             {
                 process.StartInfo.RedirectStandardOutput = m_RedirectStandardOutput;
@@ -90,7 +127,7 @@ namespace UCL.BuildLib
             process.Close();
             process.Dispose();
 
-            
+
         }
     }
 }
