@@ -264,8 +264,12 @@ namespace UCL.BuildLib
                 }
             }
         }
-        virtual protected async Cysharp.Threading.Tasks.UniTask BuildAsync(string path)
+        /// <param name="path">輸出資料夾</param>
+        /// <param name="iRunPostBuild">是否執行 PostBuildProcess (預設 true 維持原行為)。測試 build 可傳 false 跳過 — 例如 Steam VDF 上傳流程不該在 agent 測試時跑。</param>
+        virtual public async Cysharp.Threading.Tasks.UniTask<UnityEditor.Build.Reporting.BuildReport> BuildAsync(string path, bool iRunPostBuild = true)
         {
+            // aResult 提升到 method scope，讓結尾能回傳給呼叫端 (e.g. Cmd_Build 判定 build 成功/失敗)
+            UnityEditor.Build.Reporting.BuildReport aResult = null;
             try
             {
                 string buildPath = GetBuildPath(path);
@@ -304,7 +308,7 @@ namespace UCL.BuildLib
                 if (profile == null)
                 {
                     Debug.LogError($"{GetType().Name}.BuildAsync,m_BuildProfile:{m_BuildProfile}, profile == null");
-                    return;
+                    return null;
                 }
                 Debug.Log($"{GetType().Name}.BuildAsync,m_BuildProfile:{m_BuildProfile}, profile:{profile.name}");
                 if (m_OutputBuildLog)
@@ -325,9 +329,17 @@ namespace UCL.BuildLib
                 {
                     scenePaths = scenes.Select(scene => scene.path).ToArray();
                 }
-                var aResult = BuildPipeline.BuildPlayer(scenePaths, outputPath, m_BuildTarget, m_BuildOption);
+                aResult = BuildPipeline.BuildPlayer(scenePaths, outputPath, m_BuildTarget, m_BuildOption);
 
-                await OnBuildProcess(m_PostBuildProcess, buildData);
+                // iRunPostBuild=false 時跳過 PostBuildProcess (e.g. Steam VDF 上傳)，供 agent 測試 build 用 — 只產出 exe 不上傳
+                if (iRunPostBuild)
+                {
+                    await OnBuildProcess(m_PostBuildProcess, buildData);
+                }
+                else
+                {
+                    Debug.LogWarning($"{GetType().Name}.BuildAsync iRunPostBuild=false → 跳過 PostBuildProcess ({m_PostBuildProcess?.Count ?? 0} 個，含 Steam 上傳)");
+                }
 
                 if (m_OutputBuildLog)
                 {
@@ -360,12 +372,13 @@ namespace UCL.BuildLib
                 //}
 
                 //BuildPipeline.BuildPlayer(profile);
+                return aResult;
             }
             catch (System.Exception ex)
             {
                 Debug.LogException(ex);
+                return null;
             }
-            
         }
 
         protected void ThreadedLog(string iMessage, string iStackTrace = "", LogType iType = LogType.Log)
